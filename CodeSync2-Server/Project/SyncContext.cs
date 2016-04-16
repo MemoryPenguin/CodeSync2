@@ -8,11 +8,14 @@ namespace MemoryPenguin.CodeSync2.Server.Project
 {
     class SyncContext
     {
+        private HashSet<Change> changes;
         private FileSystemWatcher watcher;
         private string[] fileTypes;
 
         public SyncContext(string rootPath, string[] fileTypesInput)
         {
+            changes = new HashSet<Change>();
+
             watcher = new FileSystemWatcher(rootPath);
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
             watcher.IncludeSubdirectories = true;
@@ -29,10 +32,10 @@ namespace MemoryPenguin.CodeSync2.Server.Project
                 fileTypes[i] = type;
             }
 
-            watcher.Changed += OnWatcherEvent;
-            watcher.Deleted += OnWatcherEvent;
-            watcher.Created += OnWatcherEvent;
-            watcher.Renamed += OnWatcherEvent;
+            watcher.Changed += OnFileSystemEvent;
+            watcher.Created += OnFileSystemEvent;
+            watcher.Deleted += OnDeleteEvent;
+            watcher.Renamed += OnRenameEvent;
 
             StartWatching();
         }
@@ -47,9 +50,56 @@ namespace MemoryPenguin.CodeSync2.Server.Project
             watcher.EnableRaisingEvents = false;
         }
 
-        private void OnWatcherEvent(object source, FileSystemEventArgs args)
+        public Change[] GetCurrentChanges()
         {
-            Console.WriteLine($"change: {args.FullPath} of type {args.ChangeType}");
+            return changes.ToArray();
+        }
+
+        public void ClearChanges()
+        {
+            changes.Clear();
+        }
+
+        private bool IsTrackable(string fullPath)
+        {
+            string ext = Path.GetExtension(fullPath);
+            return fileTypes.Contains(ext);
+        }
+
+        private void PushChange(Change change)
+        {
+            changes.RemoveWhere(c => c.Path == change.Path);
+            changes.Add(change);
+        }
+
+        private void OnFileSystemEvent(object source, FileSystemEventArgs args)
+        {
+            if (IsTrackable(args.FullPath))
+            {
+                PushChange(new Change(args.FullPath, ChangeType.Write));
+            }
+        }
+
+        private void OnDeleteEvent(object source, FileSystemEventArgs args)
+        {
+            if (IsTrackable(args.FullPath))
+            {
+                PushChange(new Change(args.FullPath, ChangeType.Delete));
+            }
+        }
+
+        private void OnRenameEvent(object source, RenamedEventArgs args)
+        {
+            if (IsTrackable(args.OldFullPath))
+            {
+                string old = args.OldFullPath;
+                changes.RemoveWhere(c => c.Path == old);
+                PushChange(new Change(args.OldFullPath, ChangeType.Delete));
+            }
+            if (IsTrackable(args.FullPath))
+            {
+                PushChange(new Change(args.FullPath, ChangeType.Write));
+            }
         }
     }
 }
