@@ -1,0 +1,17 @@
+{
+	"port": 8453,
+	"mappings": [
+		{
+			"disk": "Server",
+			"roblox": "game.ServerScriptService"
+		},
+		{
+			"disk": "Client",
+			"roblox": "game.StarterPlayer.StarterPlayerScripts"
+		},
+		{
+			"disk": "Shared",
+			"roblox": "game.ReplicatedStorage.Shared"
+		}
+	]
+}
