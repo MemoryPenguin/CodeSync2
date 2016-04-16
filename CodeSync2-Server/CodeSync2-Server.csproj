@@ -52,8 +52,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Project\Change.cs" />
     <Compile Include="Project\Mapping.cs" />
-    <Compile Include="Project\Project.cs" />
-    <Compile Include="Project\SyncContext.cs" />
+    <Compile Include="Project\FileSyncContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\PathConverter.cs" />
   </ItemGroup>

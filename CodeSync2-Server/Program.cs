@@ -25,13 +25,13 @@ namespace MemoryPenguin.CodeSync2.Server
                 new Mapping(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server", "game.ServerScriptService")
             };
             config.Mode = SyncMode.TwoWay;
-
+            config.Authority = SyncAuthority.FileSystem;
 
             HttpServer server = new HttpServer(config.Port);
             server.AddRoute("test", TestRoute);
             //server.Start();
 
-            SyncContext context = new SyncContext(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server");
+            FileSyncContext context = new FileSyncContext(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server");
 
             Console.ReadLine();
 

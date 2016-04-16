@@ -1,26 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace MemoryPenguin.CodeSync2.Server.Project
 {
-    class SyncContext
+    class FileSyncContext
     {
         public string RootPath { get; private set; }
-        public string RobloxPath { get; private set; }
 
         private HashSet<Change> changes;
         private FileSystemWatcher watcher;
 
         /// <summary>
-        /// Creates a new SyncContext.
+        /// Creates a new FileSyncContext.
         /// </summary>
         /// <param name="rootPath">The path to watch</param>
         /// <param name="fileTypesInput">A list of file extensions to use</param>
-        public SyncContext(string rootPath)
+        public FileSyncContext(string rootPath)
         {
+            RootPath = rootPath;
             changes = new HashSet<Change>();
 
             watcher = new FileSystemWatcher(rootPath, "*.lua");
@@ -31,8 +29,6 @@ namespace MemoryPenguin.CodeSync2.Server.Project
             watcher.Created += OnFileSystemEvent;
             watcher.Deleted += OnDeleteEvent;
             watcher.Renamed += OnRenameEvent;
-
-            Start();
         }
 
         /// <summary>

@@ -14,6 +14,12 @@ namespace MemoryPenguin.CodeSync2.Server
         OneWay = 1,
     }
 
+    enum SyncAuthority
+    {
+        FileSystem = 0,
+        Studio = 1,
+    }
+
     struct Config
     {
         [JsonProperty("port")]
@@ -25,5 +31,9 @@ namespace MemoryPenguin.CodeSync2.Server
         [DefaultValue(SyncMode.TwoWay)]
         [JsonProperty("syncmode", DefaultValueHandling = DefaultValueHandling.Populate)]
         public SyncMode Mode { get; set; }
+
+        [DefaultValue(SyncAuthority.FileSystem)]
+        [JsonProperty("authority", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public SyncAuthority Authority { get; set; }
     }
 }
