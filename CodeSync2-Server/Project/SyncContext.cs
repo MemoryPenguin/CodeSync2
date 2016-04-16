@@ -8,20 +8,14 @@ namespace MemoryPenguin.CodeSync2.Server.Project
 {
     class SyncContext
     {
-        enum ScriptType
-        {
-            Local = 0,
-            Server = 1,
-            Module = 2,
-        }
-
         private FileSystemWatcher watcher;
         private string[] fileTypes;
 
         public SyncContext(string rootPath, string[] fileTypesInput)
         {
             watcher = new FileSystemWatcher(rootPath);
-            watcher.NotifyFilter = NotifyFilters.LastWrite;
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+            watcher.IncludeSubdirectories = true;
 
             fileTypes = new string[fileTypesInput.Length];
             for (int i = 0; i < fileTypesInput.Length; i++)
@@ -35,10 +29,10 @@ namespace MemoryPenguin.CodeSync2.Server.Project
                 fileTypes[i] = type;
             }
 
-            watcher.Changed += (source, e) =>
-            {
-                Console.WriteLine($"change: {e.FullPath} of type {e.ChangeType}");
-            };
+            watcher.Changed += OnWatcherEvent;
+            watcher.Deleted += OnWatcherEvent;
+            watcher.Created += OnWatcherEvent;
+            watcher.Renamed += OnWatcherEvent;
 
             StartWatching();
         }
@@ -51,6 +45,11 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         public void Stop()
         {
             watcher.EnableRaisingEvents = false;
+        }
+
+        private void OnWatcherEvent(object source, FileSystemEventArgs args)
+        {
+            Console.WriteLine($"change: {args.FullPath} of type {args.ChangeType}");
         }
     }
 }

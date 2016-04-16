@@ -1,4 +1,5 @@
 ﻿using MemoryPenguin.CodeSync2.Server.Network;
+using MemoryPenguin.CodeSync2.Server.Project;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,11 @@ namespace MemoryPenguin.CodeSync2.Server
 
             HttpServer server = new HttpServer(8080);
             server.AddRoute("test", TestRoute);
-            server.Start();
+            //server.Start();
+
+            SyncContext context = new SyncContext(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server", new string[0]);
+
+            Console.ReadLine();
 
             return 0;
         }
