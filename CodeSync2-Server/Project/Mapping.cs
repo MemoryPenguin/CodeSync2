@@ -12,5 +12,11 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         public string FilePath { get; set; }
         [JsonProperty("roblox")]
         public string RobloxPath { get; set; }
+
+        public Mapping(string filePath, string robloxPath)
+        {
+            FilePath = filePath;
+            RobloxPath = robloxPath;
+        }
     }
 }

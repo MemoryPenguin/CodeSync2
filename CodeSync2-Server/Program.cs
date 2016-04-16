@@ -1,13 +1,7 @@
 ﻿using MemoryPenguin.CodeSync2.Server.Network;
 using MemoryPenguin.CodeSync2.Server.Project;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemoryPenguin.CodeSync2.Server
 {
@@ -24,11 +18,20 @@ namespace MemoryPenguin.CodeSync2.Server
             string configContents = File.ReadAllText(args[0]);
             Config config = JsonConvert.DeserializeObject<Config>(configContents);*/
 
-            HttpServer server = new HttpServer(8080);
+            Config config = new Config();
+            config.Port = 8080;
+            config.Mappings = new Mapping[]
+            {
+                new Mapping(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server", "game.ServerScriptService")
+            };
+            config.Mode = SyncMode.TwoWay;
+
+
+            HttpServer server = new HttpServer(config.Port);
             server.AddRoute("test", TestRoute);
             //server.Start();
 
-            SyncContext context = new SyncContext(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server", new string[0]);
+            SyncContext context = new SyncContext(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server");
 
             Console.ReadLine();
 

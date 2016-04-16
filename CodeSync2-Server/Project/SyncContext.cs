@@ -8,62 +8,64 @@ namespace MemoryPenguin.CodeSync2.Server.Project
 {
     class SyncContext
     {
+        public string RootPath { get; private set; }
+        public string RobloxPath { get; private set; }
+
         private HashSet<Change> changes;
         private FileSystemWatcher watcher;
-        private string[] fileTypes;
 
-        public SyncContext(string rootPath, string[] fileTypesInput)
+        /// <summary>
+        /// Creates a new SyncContext.
+        /// </summary>
+        /// <param name="rootPath">The path to watch</param>
+        /// <param name="fileTypesInput">A list of file extensions to use</param>
+        public SyncContext(string rootPath)
         {
             changes = new HashSet<Change>();
 
-            watcher = new FileSystemWatcher(rootPath);
+            watcher = new FileSystemWatcher(rootPath, "*.lua");
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
             watcher.IncludeSubdirectories = true;
-
-            fileTypes = new string[fileTypesInput.Length];
-            for (int i = 0; i < fileTypesInput.Length; i++)
-            {
-                string type = fileTypesInput[i];
-                if (type.Substring(1, 1) != ".")
-                {
-                    type = '.' + type;
-                }
-
-                fileTypes[i] = type;
-            }
 
             watcher.Changed += OnFileSystemEvent;
             watcher.Created += OnFileSystemEvent;
             watcher.Deleted += OnDeleteEvent;
             watcher.Renamed += OnRenameEvent;
 
-            StartWatching();
+            Start();
         }
 
-        public void StartWatching()
+        /// <summary>
+        /// Starts watching for changes in the context's root directory.
+        /// </summary>
+        public void Start()
         {
             watcher.EnableRaisingEvents = true;
         }
 
+        /// <summary>
+        /// Stops watching for changes.
+        /// </summary>
         public void Stop()
         {
             watcher.EnableRaisingEvents = false;
         }
 
+        /// <summary>
+        /// Gets the current changes recorded by the SyncContext.
+        /// </summary>
+        /// <returns>All changes that have been recorded</returns>
         public Change[] GetCurrentChanges()
         {
             return changes.ToArray();
         }
 
+        /// <summary>
+        /// Clears the recorded changes.
+        /// </summary>
         public void ClearChanges()
         {
             changes.Clear();
-        }
-
-        private bool IsTrackable(string fullPath)
-        {
-            string ext = Path.GetExtension(fullPath);
-            return fileTypes.Contains(ext);
         }
 
         private void PushChange(Change change)
@@ -74,32 +76,20 @@ namespace MemoryPenguin.CodeSync2.Server.Project
 
         private void OnFileSystemEvent(object source, FileSystemEventArgs args)
         {
-            if (IsTrackable(args.FullPath))
-            {
-                PushChange(new Change(args.FullPath, ChangeType.Write));
-            }
+            PushChange(new Change(args.FullPath, ChangeType.Write));
         }
 
         private void OnDeleteEvent(object source, FileSystemEventArgs args)
         {
-            if (IsTrackable(args.FullPath))
-            {
-                PushChange(new Change(args.FullPath, ChangeType.Delete));
-            }
+            PushChange(new Change(args.FullPath, ChangeType.Delete));
         }
 
         private void OnRenameEvent(object source, RenamedEventArgs args)
         {
-            if (IsTrackable(args.OldFullPath))
-            {
-                string old = args.OldFullPath;
-                changes.RemoveWhere(c => c.Path == old);
-                PushChange(new Change(args.OldFullPath, ChangeType.Delete));
-            }
-            if (IsTrackable(args.FullPath))
-            {
-                PushChange(new Change(args.FullPath, ChangeType.Write));
-            }
+            string old = args.OldFullPath;
+            changes.RemoveWhere(c => c.Path == old);
+            PushChange(new Change(args.OldFullPath, ChangeType.Delete));
+            PushChange(new Change(args.FullPath, ChangeType.Write));
         }
     }
 }
