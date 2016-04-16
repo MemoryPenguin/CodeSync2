@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeSync2-Server", "CodeSync2-Server\CodeSync2-Server.csproj", "{80848428-7CB0-450B-BBF8-285FA61ED0C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeSync2-ServerTests", "CodeSync2-ServerTests\CodeSync2-ServerTests.csproj", "{F93F4253-8EE8-4DAD-9C29-9A1E0C1C04E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{80848428-7CB0-450B-BBF8-285FA61ED0C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80848428-7CB0-450B-BBF8-285FA61ED0C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80848428-7CB0-450B-BBF8-285FA61ED0C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F93F4253-8EE8-4DAD-9C29-9A1E0C1C04E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F93F4253-8EE8-4DAD-9C29-9A1E0C1C04E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F93F4253-8EE8-4DAD-9C29-9A1E0C1C04E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F93F4253-8EE8-4DAD-9C29-9A1E0C1C04E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

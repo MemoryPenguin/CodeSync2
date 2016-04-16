@@ -7,8 +7,11 @@ using System.Text;
 
 namespace MemoryPenguin.CodeSync2.Server.Utility
 {
-    class PathConverter
+    public class PathConverter
     {
+        public static readonly int DIRECTORY_ATTRIBUTE = 0x10;
+        public static readonly int FILE_ATTRIBUTE = 0x80;
+
         [DllImport("shlwapi.dll", SetLastError = true)]
         private static extern int PathRelativePathTo(StringBuilder pszPath, string pszFrom, int dwAttrFrom, string pszTo, int dwAttrTo);
 
@@ -20,16 +23,28 @@ namespace MemoryPenguin.CodeSync2.Server.Utility
             if (directoryInfo.Exists)
             {
                 // directory file attribute
-                return 0x10;
+                return DIRECTORY_ATTRIBUTE;
             }
             
             if (fileInfo.Exists)
             {
                 // normal file attribute
-                return 0x80;
+                return FILE_ATTRIBUTE;
             }
 
             throw new FileNotFoundException();
+        }
+
+        public static string MakeRelativePath(string absolutePath, string rootPath, int absoluteAttribute, int rootAttribute)
+        {
+            StringBuilder pathBuilder = new StringBuilder(256);
+
+            if (PathRelativePathTo(pathBuilder, rootPath, rootAttribute, absolutePath, absoluteAttribute) == 0)
+            {
+                throw new ArgumentException("Paths lack a common prefix");
+            }
+
+            return pathBuilder.ToString();
         }
 
         /// <summary>
@@ -41,16 +56,9 @@ namespace MemoryPenguin.CodeSync2.Server.Utility
         /// <returns>A relative path, relative to rootPath.</returns>
         public static string MakeRelativePath(string absolutePath, string rootPath)
         {
-            int pathAttribute = GetPathAttribute(absolutePath);
+            int absoluteAttribute = GetPathAttribute(absolutePath);
             int rootAttribute = GetPathAttribute(rootPath);
-            StringBuilder pathBuilder = new StringBuilder(256);
-
-            if (PathRelativePathTo(pathBuilder, rootPath, rootAttribute, absolutePath, pathAttribute) == 0)
-            {
-                throw new ArgumentException("Paths lack a common prefix");
-            }
-
-            return pathBuilder.ToString();
+            return MakeRelativePath(absolutePath, rootPath, absoluteAttribute, rootAttribute);
         }
 
         public static string MakeAbsolutePath(string relativePath, string rootPath)
