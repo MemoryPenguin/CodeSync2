@@ -21,23 +21,39 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         public string FilePath { get; private set; }
         public string RobloxPath { get; private set; }
 
-        public Script(string path, string rootPath, string robloxMappingRoot)
+        public static Script FromFileSystem(string filePath, Mapping mapping)
         {
-            FilePath = path;
+            string info = Path.GetFileNameWithoutExtension(filePath);
+            string name = Path.GetFileNameWithoutExtension(info);
+            string typeString = Path.GetExtension(info);
+            string relativeFsPath = PathExtension.MakeRelativePath(mapping.FsPath, filePath);
+            string relativeRbxPath = RobloxPathHelper.FromFsPath(relativeFsPath);
+            string rbxPath = RobloxPathHelper.Join(mapping.RobloxPath, relativeRbxPath);
 
-            string info = Path.GetFileNameWithoutExtension(path);
-            Name = Path.GetFileNameWithoutExtension(info);
-            Type = GetScriptType(Path.GetExtension(info));
+            Script script = new Script();
+            script.RobloxPath = rbxPath;
+            script.FilePath = filePath;
+            script.Name = name;
+            script.Type = GetScriptType(typeString);
 
-            //RobloxPath = PathExtension.JoinRobloxPaths(robloxMappingRoot, PathExtension.FsToRobloxPath(path, rootPath));
+            return script;
         }
 
-        public Script(string robloxPath, ScriptType type, string mappingRoot)
+        public static Script FromRoblox(string rbxPath, ScriptType rbxType, Mapping mapping)
         {
-            Type = type;
-            RobloxPath = robloxPath;
-            //FilePath = PathExtension.MakeAbsolutePath(PathExtension.RobloxToFsPath(robloxPath, mappingRoot, GetExtension(type) + ".lua"), mappingRoot);
-            Name = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(FilePath));
+            string relativeRbxPath = RobloxPathHelper.MakeRelativePath(rbxPath, mapping.RobloxPath);
+            string relativeFsPath = RobloxPathHelper.ToFsPath(relativeRbxPath);
+            string absoluteFsPath = PathExtension.MakeAbsolutePath(relativeFsPath, mapping.FsPath);
+            string ext = GetExtension(rbxType) + ".lua";
+            absoluteFsPath = absoluteFsPath + ext;
+
+            Script script = new Script();
+            script.RobloxPath = rbxPath;
+            script.FilePath = absoluteFsPath;
+            script.Name = RobloxPathHelper.GetName(rbxPath);
+            script.Type = rbxType;
+
+            return script;
         }
 
         public string GetFileContents()
@@ -45,8 +61,13 @@ namespace MemoryPenguin.CodeSync2.Server.Project
             return File.ReadAllText(FilePath);
         }
 
-        private ScriptType GetScriptType(string typeString)
+        public static ScriptType GetScriptType(string typeString)
         {
+            if (string.IsNullOrWhiteSpace(typeString))
+            {
+                return ScriptType.Server;
+            }
+
             typeString = typeString.ToLower().Substring(1);
             
             switch (typeString)
@@ -62,7 +83,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
             }
         }
 
-        private string GetExtension(ScriptType type)
+        public static string GetExtension(ScriptType type)
         {
             switch (type)
             {

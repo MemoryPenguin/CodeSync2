@@ -13,16 +13,21 @@ namespace MemoryPenguin.CodeSync2.Server.Project.Tests
         [TestMethod()]
         public void FsScriptTest()
         {
-            Script script = new Script(@"C:\Test\TestScript.mod.lua", @"C:\Test", "game.ServerScriptService");
+            Script script = Script.FromFileSystem(@"C:\Test\Module.mod.lua", new Mapping(@"C:\Test", "game.ServerScriptService"));
             Assert.AreEqual(ScriptType.Module, script.Type);
-            Assert.AreEqual("TestScript", script.Name);
-            Assert.AreEqual("game.ServerScriptService.TestScript", script.RobloxPath);
+            Assert.AreEqual("Module", script.Name);
+            Assert.AreEqual("game.ServerScriptService.Module", script.RobloxPath);
+            Assert.AreEqual(@"C:\Test\Module.mod.lua", script.FilePath);
         }
 
         [TestMethod()]
         public void RobloxScriptTest()
         {
-            Assert.Fail();
+            Script script = Script.FromRoblox("game.ServerScriptService.Module", ScriptType.Module, new Mapping(@"C:\Test", "game.ServerScriptService"));
+            Assert.AreEqual(@"C:\Test\Module.mod.lua", script.FilePath);
+            Assert.AreEqual("Module", script.Name);
+            Assert.AreEqual("game.ServerScriptService.Module", script.RobloxPath);
+            Assert.AreEqual(ScriptType.Module, script.Type);
         }
     }
 }

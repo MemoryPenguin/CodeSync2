@@ -1,46 +1,94 @@
 ﻿using MemoryPenguin.CodeSync2.Server.Network;
 using MemoryPenguin.CodeSync2.Server.Project;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 
 namespace MemoryPenguin.CodeSync2.Server
 {
     class Program
     {
+        static List<SyncContext> contexts = new List<SyncContext>();
+        static Config config;
+
         static int Main(string[] args)
         {
-            /*if (args.Length != 1)
+            if (args.Length != 1)
             {
                 Console.WriteLine("Usage: codesync <config_file>");
+                Console.ReadLine();
                 return 1;
             }
 
-            string configContents = File.ReadAllText(args[0]);
-            Config config = JsonConvert.DeserializeObject<Config>(configContents);*/
+            FileInfo fileInfo = new FileInfo(args[0]);
 
-            Config config = new Config();
-            config.Port = 8080;
-            config.Mappings = new Mapping[]
+            if (!fileInfo.Exists)
             {
-                new Mapping(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server", "game.ServerScriptService")
-            };
-            config.Mode = SyncMode.TwoWay;
-            config.Authority = SyncAuthority.FileSystem;
+                Console.WriteLine($"Can't access file at {args[0]}.");
+                return 1;
+            }
+
+            string directoryPath = new FileInfo(args[0]).DirectoryName;
+            string absoluteConfigPath = Path.GetFullPath(args[0]);
+
+            Directory.SetCurrentDirectory(directoryPath);
+            Console.WriteLine($"Set working directory to {directoryPath}.");
+
+            string configContents = File.ReadAllText(absoluteConfigPath);
+            config = JsonConvert.DeserializeObject<Config>(configContents);
+            config.FileLocation = args[0];
+
+            Console.WriteLine($"Config loaded from {args[0]}.");
+
+            ValidationResult validationResult = config.Validate();
+            if (!validationResult.Valid)
+            {
+                Console.WriteLine("Malformed config: {0}", validationResult.Message);
+                Console.ReadLine();
+                return 1;
+            }
+
+            foreach (Mapping mapping in config.Mappings)
+            {
+                contexts.Add(new SyncContext(mapping));
+            }
 
             HttpServer server = new HttpServer(config.Port);
             server.AddRoute("test", TestRoute);
-            //server.Start();
+            server.AddRoute("read", ReadRoute);
+            server.AddRoute("scripts", GetScriptsRoute);
 
-            FileSyncContext context = new FileSyncContext(@"D:\Documents\Visual Studio 2015\Projects\CodeSync2\TestProject\Server");
+            Console.WriteLine($"CodeSync server started on port {config.Port}.");
+            server.Start();
 
             Console.ReadLine();
 
             return 0;
         }
 
-        private static string TestRoute(NameValueCollection args)
+        private static object TestRoute(NameValueCollection args)
         {
             return "Hello, world!";
+        }
+
+        private static object ReadRoute(NameValueCollection args)
+        {
+            string path = args.Get("path");
+            return File.ReadAllText(path);
+        }
+
+        private static object GetScriptsRoute(NameValueCollection args)
+        {
+            List<Script> scripts = new List<Script>();
+
+            foreach (SyncContext context in contexts)
+            {
+                scripts.AddRange(context.GetScripts());
+            }
+
+            return scripts;
         }
     }
 }

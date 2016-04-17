@@ -10,8 +10,8 @@
 			"roblox": "game.StarterPlayer.StarterPlayerScripts"
 		},
 		{
-			"disk": "Shared",
-			"roblox": "game.ReplicatedStorage.Shared"
+			"disk": "Common",
+			"roblox": "game.ReplicatedStorage.Common"
 		}
 	]
 }

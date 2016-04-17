@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace MemoryPenguin.CodeSync2.Server.Utility
 {
-    public static class RobloxPath
+    public static class RobloxPathHelper
     {
         private static Regex removeInnerSeparators = new Regex(@"\b\.{2,}\b", RegexOptions.Compiled);
         private static Regex removeOuterSeparators = new Regex(@"(?:^\.+)|(?:\.+$)", RegexOptions.Compiled);
@@ -23,6 +23,11 @@ namespace MemoryPenguin.CodeSync2.Server.Utility
         public static string FromFsPath(string fsPath)
         {
             string robloxPath = fsPath;
+            
+            while (!string.IsNullOrEmpty(Path.GetExtension(robloxPath)))
+            {
+                robloxPath = robloxPath.Replace(Path.GetExtension(robloxPath), "");
+            }
 
             if (!string.IsNullOrEmpty(Path.GetPathRoot(robloxPath)))
             {
@@ -83,6 +88,17 @@ namespace MemoryPenguin.CodeSync2.Server.Utility
         public static string Join(string path1, string path2)
         {
             return Normalize(path1) + '.' + Normalize(path2);
+        }
+
+        /// <summary>
+        /// Gets the name of the instance that a path refers to.
+        /// </summary>
+        /// <param name="path">The path to retrieve a name from</param>
+        /// <returns>The name that the path ends in</returns>
+        public static string GetName(string path)
+        {
+            string name = path.Substring(path.LastIndexOf('.') + 1);
+            return name;
         }
     }
 }

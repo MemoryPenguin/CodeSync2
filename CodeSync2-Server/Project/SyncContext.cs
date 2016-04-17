@@ -4,24 +4,25 @@ using System.Linq;
 
 namespace MemoryPenguin.CodeSync2.Server.Project
 {
-    class FileSyncContext
+    class SyncContext
     {
-        public string RootPath { get; private set; }
+        public Mapping ContextMapping { get; private set; }
 
+        private List<Script> scripts;
         private HashSet<Change> changes;
         private FileSystemWatcher watcher;
 
         /// <summary>
-        /// Creates a new FileSyncContext.
+        /// Creates a new SyncContext.
         /// </summary>
-        /// <param name="rootPath">The path to watch</param>
-        /// <param name="fileTypesInput">A list of file extensions to use</param>
-        public FileSyncContext(string rootPath)
+        /// <param name="mapping">The mapping to handle</param>
+        public SyncContext(Mapping mapping)
         {
-            RootPath = rootPath;
+            ContextMapping = mapping;
             changes = new HashSet<Change>();
+            scripts = new List<Script>();
 
-            watcher = new FileSystemWatcher(rootPath, "*.lua");
+            watcher = new FileSystemWatcher(mapping.FsPath, "*.lua");
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
             watcher.IncludeSubdirectories = true;
 
@@ -62,6 +63,21 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         public void ClearChanges()
         {
             changes.Clear();
+        }
+
+        public Script[] GetScripts()
+        {
+            string[] files = Directory.GetFiles(ContextMapping.FsPath, "*.lua", SearchOption.AllDirectories);
+            Script[] scripts = new Script[files.Length];
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                string filePath = files[i];
+                Script script = Script.FromFileSystem(filePath, ContextMapping);
+                scripts[i] = script;
+            }
+
+            return scripts;
         }
 
         private void PushChange(Change change)

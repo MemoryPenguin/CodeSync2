@@ -21,7 +21,7 @@ namespace MemoryPenguin.CodeSync2.Server.Network
         }
 
         private HttpListener listener;
-        private Dictionary<string, Func<NameValueCollection, string>> routes;
+        private Dictionary<string, Func<NameValueCollection, object>> routes;
 
         public HttpServer(int port)
         {
@@ -29,7 +29,7 @@ namespace MemoryPenguin.CodeSync2.Server.Network
 
             listener = new HttpListener();
             listener.Prefixes.Add($"http://localhost:{port}/");
-            routes = new Dictionary<string, Func<NameValueCollection, string>>();
+            routes = new Dictionary<string, Func<NameValueCollection, object>>();
         }
 
         public void Start()
@@ -53,7 +53,7 @@ namespace MemoryPenguin.CodeSync2.Server.Network
                 else
                 {
                     // Start one character after, since RawUrl starts with a /
-                    string route = request.RawUrl.Substring(1);
+                    string route = request.Url.LocalPath.Substring(1);
 
                     try
                     {
@@ -69,7 +69,7 @@ namespace MemoryPenguin.CodeSync2.Server.Network
                             responseInfo.StatusCode = 500;
                             responseInfo.StatusDescription = "Route errored";
                             responseInfo.Data = e.Message;
-                            Console.WriteLine(e.Message);
+                            Console.WriteLine(e.ToString());
                         }
                     }
                     catch
@@ -98,7 +98,7 @@ namespace MemoryPenguin.CodeSync2.Server.Network
             listener.Close();
         }
 
-        public void AddRoute(string route, Func<NameValueCollection, string> responder)
+        public void AddRoute(string route, Func<NameValueCollection, object> responder)
         {
             routes.Add(route, responder);
         }
@@ -107,7 +107,7 @@ namespace MemoryPenguin.CodeSync2.Server.Network
         {
             public int StatusCode { get; set; }
             public string StatusDescription { get; set; }
-            public string Data { get; set; }
+            public object Data { get; set; }
 
             public Response(int status, string response)
             {
