@@ -53,8 +53,10 @@
     <Compile Include="Project\Change.cs" />
     <Compile Include="Project\Mapping.cs" />
     <Compile Include="Project\FileSyncContext.cs" />
+    <Compile Include="Project\Script.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\PathConverter.cs" />
+    <Compile Include="Utility\PathExtension.cs" />
+    <Compile Include="Utility\RobloxPath.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

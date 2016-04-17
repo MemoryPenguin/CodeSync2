@@ -51,8 +51,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Project\ScriptTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\PathConverterTests.cs" />
+    <Compile Include="Utility\PathExtensionTests.cs" />
+    <Compile Include="Utility\RobloxPathTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CodeSync2-Server\CodeSync2-Server.csproj">
@@ -60,6 +62,7 @@
       <Name>CodeSync2-Server</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
