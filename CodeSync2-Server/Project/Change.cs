@@ -13,12 +13,12 @@ namespace MemoryPenguin.CodeSync2.Server.Project
 
     struct Change
     {
-        public string Path { get; private set; }
+        public Script ChangedScript { get; private set; }
         public ChangeType Type { get; private set; }
 
-        public Change(string fullPath, ChangeType type) : this()
+        public Change(Script script, ChangeType type) : this()
         {
-            Path = fullPath;
+            ChangedScript = script;
             Type = type;
         }
 
@@ -34,7 +34,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
 
         public override int GetHashCode()
         {
-            return Path.GetHashCode() * 17 + Type.GetHashCode();
+            return ChangedScript.GetHashCode() * 17 + Type.GetHashCode();
         }
 
         public static bool Equals(Change a, Change b)
@@ -44,7 +44,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
                 return true;
             }
 
-            return a.Path == b.Path && a.Type == b.Type;
+            return a.ChangedScript == b.ChangedScript && a.Type == b.Type;
         }
 
         public static bool operator ==(Change a, Change b)

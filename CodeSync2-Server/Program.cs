@@ -10,7 +10,6 @@ namespace MemoryPenguin.CodeSync2.Server
 {
     class Program
     {
-        static List<SyncContext> contexts = new List<SyncContext>();
         static Config config;
 
         static int Main(string[] args)
@@ -50,45 +49,11 @@ namespace MemoryPenguin.CodeSync2.Server
                 return 1;
             }
 
-            foreach (Mapping mapping in config.Mappings)
-            {
-                contexts.Add(new SyncContext(mapping));
-            }
-
-            HttpServer server = new HttpServer(config.Port);
-            server.AddRoute("test", TestRoute);
-            server.AddRoute("read", ReadRoute);
-            server.AddRoute("scripts", GetScriptsRoute);
-
-            Console.WriteLine($"CodeSync server started on port {config.Port}.");
+            ProjectServer server = new ProjectServer(config);
+            Console.WriteLine($"CodeSync server starting on port {config.Port}.");
             server.Start();
 
-            Console.ReadLine();
-
             return 0;
-        }
-
-        private static object TestRoute(NameValueCollection args)
-        {
-            return "Hello, world!";
-        }
-
-        private static object ReadRoute(NameValueCollection args)
-        {
-            string path = args.Get("path");
-            return File.ReadAllText(path);
-        }
-
-        private static object GetScriptsRoute(NameValueCollection args)
-        {
-            List<Script> scripts = new List<Script>();
-
-            foreach (SyncContext context in contexts)
-            {
-                scripts.AddRange(context.GetScripts());
-            }
-
-            return scripts;
         }
     }
 }

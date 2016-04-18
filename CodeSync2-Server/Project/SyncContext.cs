@@ -7,8 +7,8 @@ namespace MemoryPenguin.CodeSync2.Server.Project
     class SyncContext
     {
         public Mapping ContextMapping { get; private set; }
+        public Dictionary<string, Script> Scripts { get; private set; }
 
-        private List<Script> scripts;
         private HashSet<Change> changes;
         private FileSystemWatcher watcher;
 
@@ -20,7 +20,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         {
             ContextMapping = mapping;
             changes = new HashSet<Change>();
-            scripts = new List<Script>();
+            Scripts = new Dictionary<string, Script>();
 
             watcher = new FileSystemWatcher(mapping.FsPath, "*.lua");
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
@@ -38,6 +38,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         public void Start()
         {
             watcher.EnableRaisingEvents = true;
+            RepopulateScripts();
         }
 
         /// <summary>
@@ -65,43 +66,48 @@ namespace MemoryPenguin.CodeSync2.Server.Project
             changes.Clear();
         }
 
-        public Script[] GetScripts()
+        public void RepopulateScripts()
         {
+            Scripts.Clear();
+
             string[] files = Directory.GetFiles(ContextMapping.FsPath, "*.lua", SearchOption.AllDirectories);
-            Script[] scripts = new Script[files.Length];
-
-            for (int i = 0; i < files.Length; i++)
+            foreach (string file in files)
             {
-                string filePath = files[i];
-                Script script = Script.FromFileSystem(filePath, ContextMapping);
-                scripts[i] = script;
+                Scripts[file] = Script.FromFileSystem(file, ContextMapping);
             }
-
-            return scripts;
         }
 
-        private void PushChange(Change change)
+        private void PushChange(string path, ChangeType type)
         {
-            changes.RemoveWhere(c => c.Path == change.Path);
-            changes.Add(change);
+            if (!Scripts.ContainsKey(path))
+            {
+                Scripts[path] = Script.FromFileSystem(path, ContextMapping);
+            }
+
+            changes.RemoveWhere(c => c.ChangedScript.FilePath == path);
+            changes.Add(new Change(Scripts[path], type));
+
+            if (type == ChangeType.Delete)
+            {
+                Scripts.Remove(path);
+            }
         }
 
         private void OnFileSystemEvent(object source, FileSystemEventArgs args)
         {
-            PushChange(new Change(args.FullPath, ChangeType.Write));
+            PushChange(args.FullPath, ChangeType.Write);
         }
 
         private void OnDeleteEvent(object source, FileSystemEventArgs args)
         {
-            PushChange(new Change(args.FullPath, ChangeType.Delete));
+            PushChange(args.FullPath, ChangeType.Delete);
         }
 
         private void OnRenameEvent(object source, RenamedEventArgs args)
         {
             string old = args.OldFullPath;
-            changes.RemoveWhere(c => c.Path == old);
-            PushChange(new Change(args.OldFullPath, ChangeType.Delete));
-            PushChange(new Change(args.FullPath, ChangeType.Write));
+            PushChange(args.OldFullPath, ChangeType.Delete);
+            PushChange(args.FullPath, ChangeType.Write);
         }
     }
 }
