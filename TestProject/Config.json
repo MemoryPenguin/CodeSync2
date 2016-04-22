@@ -3,15 +3,15 @@
 	"mappings": [
 		{
 			"disk": "Server",
-			"roblox": "game.ServerScriptService"
+			"roblox": "game.ServerScriptService.TestProject"
 		},
 		{
 			"disk": "Client",
-			"roblox": "game.StarterPlayer.StarterPlayerScripts"
+			"roblox": "game.StarterPlayer.StarterPlayerScripts.TestProject"
 		},
 		{
 			"disk": "Common",
-			"roblox": "game.ReplicatedStorage.Common"
+			"roblox": "game.ReplicatedStorage.TestProject"
 		}
 	]
 }

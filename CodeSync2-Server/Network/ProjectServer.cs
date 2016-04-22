@@ -17,8 +17,22 @@ namespace MemoryPenguin.CodeSync2.Server.Network
             }
         }
 
+        private List<Script> Scripts
+        {
+            get
+            {
+                List<Script> scripts = new List<Script>();
+
+                foreach (SyncContext context in contexts)
+                {
+                    scripts.AddRange(context.GetScripts());
+                }
+
+                return scripts;
+            }
+        }
+
         private List<SyncContext> contexts;
-        private HashSet<Script> scripts;
         private HttpServer server;
         private Config config;
 
@@ -26,7 +40,6 @@ namespace MemoryPenguin.CodeSync2.Server.Network
         {
             server = new HttpServer(config.Port);
             contexts = new List<SyncContext>();
-            scripts = new HashSet<Script>();
             this.config = config;
 
             foreach (Mapping mapping in config.Mappings)
@@ -45,26 +58,21 @@ namespace MemoryPenguin.CodeSync2.Server.Network
         private object RouteGetScriptContents(NameValueCollection args)
         {
             string target = args["location"];
-            IEnumerable<Script> matchingScripts = scripts.Where(s => s.RobloxPath == target);
-            
-            if (matchingScripts.Count() > 0)
-            {
-                return matchingScripts.ElementAt(0).GetFileContents();
-            }
 
-            return string.Empty;
+            try
+            {
+                Script result = Scripts.First(s => s.RobloxPath == target);
+                return result.GetFileContents();
+            }
+            catch
+            {
+                return "-- CodeSync couldn't find the file on the file system. Something is wrong.";
+            }
         }
 
         private object RouteGetScripts(NameValueCollection args)
         {
-            List<Script> scripts = new List<Script>();
-
-            foreach (SyncContext context in contexts)
-            {
-                scripts.AddRange(context.Scripts.Values);
-            }
-
-            return scripts;
+            return Scripts;
         }
 
         private object RouteGetInfo(NameValueCollection args)
@@ -74,7 +82,7 @@ namespace MemoryPenguin.CodeSync2.Server.Network
 
         public object RouteGetChanges(NameValueCollection args)
         {
-            List<Change> changes = new List<Change>();
+            List<IChange> changes = new List<IChange>();
 
             foreach (SyncContext context in contexts)
             {

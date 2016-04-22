@@ -51,7 +51,9 @@
     <Compile Include="Network\HttpServer.cs" />
     <Compile Include="Network\ProjectServer.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Project\Change.cs" />
+    <Compile Include="Project\WriteChange.cs" />
+    <Compile Include="Project\DeleteChange.cs" />
+    <Compile Include="Project\IChange.cs" />
     <Compile Include="Project\Mapping.cs" />
     <Compile Include="Project\SyncContext.cs" />
     <Compile Include="Project\Script.cs" />

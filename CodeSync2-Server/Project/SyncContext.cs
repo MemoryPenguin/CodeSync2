@@ -7,9 +7,9 @@ namespace MemoryPenguin.CodeSync2.Server.Project
     class SyncContext
     {
         public Mapping ContextMapping { get; private set; }
-        public Dictionary<string, Script> Scripts { get; private set; }
 
-        private HashSet<Change> changes;
+        private Dictionary<string, Script> scripts;
+        private HashSet<IChange> changes;
         private FileSystemWatcher watcher;
 
         /// <summary>
@@ -19,8 +19,8 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         public SyncContext(Mapping mapping)
         {
             ContextMapping = mapping;
-            changes = new HashSet<Change>();
-            Scripts = new Dictionary<string, Script>();
+            changes = new HashSet<IChange>();
+            scripts = new Dictionary<string, Script>();
 
             watcher = new FileSystemWatcher(mapping.FsPath, "*.lua");
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
@@ -53,7 +53,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         /// Gets the current changes recorded by the SyncContext.
         /// </summary>
         /// <returns>All changes that have been recorded</returns>
-        public Change[] GetCurrentChanges()
+        public IChange[] GetCurrentChanges()
         {
             return changes.ToArray();
         }
@@ -68,46 +68,84 @@ namespace MemoryPenguin.CodeSync2.Server.Project
 
         public void RepopulateScripts()
         {
-            Scripts.Clear();
+            scripts.Clear();
 
             string[] files = Directory.GetFiles(ContextMapping.FsPath, "*.lua", SearchOption.AllDirectories);
             foreach (string file in files)
             {
-                Scripts[file] = Script.FromFileSystem(file, ContextMapping);
+                scripts[file] = Script.FromFileSystem(file, ContextMapping);
             }
         }
 
-        private void PushChange(string path, ChangeType type)
+        public Script[] GetScripts()
         {
-            if (!Scripts.ContainsKey(path))
+            return scripts.Values.ToArray();
+        }
+
+        private Script GetScript(string path)
+        {
+            if (!scripts.ContainsKey(path))
             {
-                Scripts[path] = Script.FromFileSystem(path, ContextMapping);
+                scripts[path] = Script.FromFileSystem(path, ContextMapping);
             }
 
-            changes.RemoveWhere(c => c.ChangedScript.FilePath == path);
-            changes.Add(new Change(Scripts[path], type));
+            return scripts[path];
+        }
 
-            if (type == ChangeType.Delete)
+        private void PushChange(string path, IChange change)
+        {
+            changes.RemoveWhere(c => c.ChangedScript.FilePath == path);
+            changes.Add(change);
+
+            if (change.Type == ChangeType.Delete)
             {
-                Scripts.Remove(path);
+                scripts.Remove(path);
             }
         }
 
         private void OnFileSystemEvent(object source, FileSystemEventArgs args)
         {
-            PushChange(args.FullPath, ChangeType.Write);
+            PushChange(args.FullPath, new WriteChange(GetScript(args.FullPath), ReadText(args.FullPath)));
         }
 
         private void OnDeleteEvent(object source, FileSystemEventArgs args)
         {
-            PushChange(args.FullPath, ChangeType.Delete);
+            PushChange(args.FullPath, new DeleteChange(GetScript(args.FullPath)));
         }
 
         private void OnRenameEvent(object source, RenamedEventArgs args)
         {
             string old = args.OldFullPath;
-            PushChange(args.OldFullPath, ChangeType.Delete);
-            PushChange(args.FullPath, ChangeType.Write);
+            PushChange(args.OldFullPath, new DeleteChange(GetScript(args.FullPath)));
+            PushChange(args.FullPath, new WriteChange(GetScript(args.FullPath), ReadText(args.FullPath)));
+        }
+
+        /// <summary>
+        /// Reads a file. Will block until the file is available.
+        /// </summary>
+        /// <param name="path">The path to read.</param>
+        /// <returns>The contents of the file.</returns>
+        private string ReadText(string path)
+        {
+            string contents = null;
+
+            while (contents == null)
+            {
+                try
+                {
+                    using (Stream stream = new FileStream(path, FileMode.Open))
+                    {
+                        StreamReader reader = new StreamReader(stream);
+                        contents = reader.ReadToEnd();
+                    }
+                }
+                catch
+                {
+                    // no-op
+                }
+            }
+
+            return contents;
         }
     }
 }

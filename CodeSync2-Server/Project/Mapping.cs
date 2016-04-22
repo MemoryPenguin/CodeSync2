@@ -15,6 +15,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
         [JsonProperty("disk")]
         public string RawFsPath { get; set; }
 
+        [JsonProperty("absoluteDisk")]
         public string FsPath
         {
             get

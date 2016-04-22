@@ -5,28 +5,27 @@ using System.Text;
 
 namespace MemoryPenguin.CodeSync2.Server.Project
 {
-    enum ChangeType
+    struct DeleteChange : IChange
     {
-        Write = 0,
-        Delete = 1,
-    }
+        public Script ChangedScript { get; }
+        public ChangeType Type
+        {
+            get
+            {
+                return ChangeType.Delete;
+            }
+        }
 
-    struct Change
-    {
-        public Script ChangedScript { get; private set; }
-        public ChangeType Type { get; private set; }
-
-        public Change(Script script, ChangeType type) : this()
+        public DeleteChange(Script script) : this()
         {
             ChangedScript = script;
-            Type = type;
         }
 
         public override bool Equals(object obj)
         {
-            if (obj.GetType() == typeof(Change))
+            if (obj.GetType() == typeof(DeleteChange))
             {
-                return Equals(this, (Change) obj);
+                return Equals(this, (DeleteChange)obj);
             }
 
             return false;
@@ -37,7 +36,7 @@ namespace MemoryPenguin.CodeSync2.Server.Project
             return ChangedScript.GetHashCode() * 17 + Type.GetHashCode();
         }
 
-        public static bool Equals(Change a, Change b)
+        public static bool Equals(DeleteChange a, DeleteChange b)
         {
             if (ReferenceEquals(a, b))
             {
@@ -47,12 +46,12 @@ namespace MemoryPenguin.CodeSync2.Server.Project
             return a.ChangedScript == b.ChangedScript && a.Type == b.Type;
         }
 
-        public static bool operator ==(Change a, Change b)
+        public static bool operator ==(DeleteChange a, DeleteChange b)
         {
             return Equals(a, b);
         }
 
-        public static bool operator !=(Change a, Change b)
+        public static bool operator !=(DeleteChange a, DeleteChange b)
         {
             return !Equals(a, b);
         }
