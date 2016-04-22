@@ -1,0 +1,1780 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<External>null</External>
+	<External>nil</External>
+	<Item class="Folder" referent="RBX8464C8EE72E44C60B655F70F6CFD5F43">
+		<Properties>
+			<string name="Name">CodeSync2</string>
+		</Properties>
+		<Item class="Script" referent="RBX8432719F3143465A951933F75046F432">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">CodeSync2</string>
+				<ProtectedString name="Source"><![CDATA[local NetworkBridge = require(script.NetworkBridge)
+local UserInterfaceBridge = require(script.UserInterfaceBridge)
+local SyncHandler = require(script.SyncHandler)
+
+local function FormatTable(t, indentLevel)
+	indentLevel = indentLevel or 0
+	local indentStr = ("\t"):format():rep(indentLevel + 1)
+	
+	local result = "{\n"
+	
+	for key, value in pairs(t) do
+		local strValue = tostring(value)
+		if type(value) == "table" then
+			strValue = FormatTable(value, indentLevel + 1)
+		end
+		
+		result = result..("%s[%s] = %s,\n"):format(indentStr, key, strValue)
+	end
+	
+	return result..("\t"):format():rep(indentLevel).."}"
+end
+
+-- squelch warnings
+plugin = plugin
+
+local toolbar = plugin:CreateToolbar("CodeSync 2")
+local button = toolbar:CreateButton("CodeSync 2", "Opens the CodeSync 2 user interface, allowing you to synchronize files across your computer and Studio.", "rbxassetid://347676411")
+local open = false
+button.Click:connect(function()
+	open = not open
+	button:SetActive(open)
+	UserInterfaceBridge.SetUiOpen(open)
+end)
+
+local syncing = false
+
+UserInterfaceBridge.OnTogglePressed:connect(function()
+	syncing = false
+	
+	local port = UserInterfaceBridge.GetPort()
+	
+	if not port then
+		UserInterfaceBridge.SetErrorMessage("Port should be a number between 1 and 65355")
+		return
+	end
+	
+	NetworkBridge.Port = port
+	local success, info = pcall(NetworkBridge.GetInfo)
+	if not success then
+		UserInterfaceBridge.SetErrorMessage("Couldn't retrieve sync info; see output for more information")
+		warn(info)
+		return
+	end
+	
+	local handler = SyncHandler.new(port, info.mappings)
+	handler:Start()
+	plugin:SetSetting("LastPort", port)
+	
+	local start = tick()
+	syncing = start
+	
+	while syncing == start do
+		wait(1)
+		handler:Update()
+	end
+end)
+
+UserInterfaceBridge.SetPort(plugin:GetSetting("LastPort") or 8453)]]></ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="ScreenGui" referent="RBX6F4089B2CC194B5FABB0792088D0641E">
+			<Properties>
+				<string name="Name">CodeSync2Gui</string>
+			</Properties>
+			<Item class="Frame" referent="RBX88D9C3A956A947A3A1215CEBA4922183">
+				<Properties>
+					<bool name="Active">false</bool>
+					<Color3 name="BackgroundColor3">4291348680</Color3>
+					<float name="BackgroundTransparency">0</float>
+					<Color3 name="BorderColor3">4284769380</Color3>
+					<int name="BorderSizePixel">1</int>
+					<bool name="ClipsDescendants">true</bool>
+					<bool name="Draggable">false</bool>
+					<string name="Name">Container</string>
+					<Ref name="NextSelectionDown">null</Ref>
+					<Ref name="NextSelectionLeft">null</Ref>
+					<Ref name="NextSelectionRight">null</Ref>
+					<Ref name="NextSelectionUp">null</Ref>
+					<UDim2 name="Position">
+						<XS>0.25</XS>
+						<XO>0</XO>
+						<YS>0.5</YS>
+						<YO>-65</YO>
+					</UDim2>
+					<float name="Rotation">0</float>
+					<bool name="Selectable">false</bool>
+					<Ref name="SelectionImageObject">null</Ref>
+					<UDim2 name="Size">
+						<XS>0</XS>
+						<XO>580</XO>
+						<YS>0</YS>
+						<YO>129</YO>
+					</UDim2>
+					<token name="SizeConstraint">0</token>
+					<token name="Style">0</token>
+					<bool name="Visible">true</bool>
+					<int name="ZIndex">1</int>
+				</Properties>
+				<Item class="Frame" referent="RBX157DE3FF04B4473AA95A9B5513627D37">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4293980400</Color3>
+						<float name="BackgroundTransparency">0</float>
+						<Color3 name="BorderColor3">4284769380</Color3>
+						<int name="BorderSizePixel">1</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<string name="Name">Top</string>
+						<Ref name="NextSelectionDown">null</Ref>
+						<Ref name="NextSelectionLeft">null</Ref>
+						<Ref name="NextSelectionRight">null</Ref>
+						<Ref name="NextSelectionUp">null</Ref>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>0</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selectable">false</bool>
+						<Ref name="SelectionImageObject">null</Ref>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>43</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">0</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">1</int>
+					</Properties>
+					<Item class="TextLabel" referent="RBX05E86FA6A4B2453A88A8C6A41ACE31B3">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4294967295</Color3>
+							<float name="BackgroundTransparency">1</float>
+							<Color3 name="BorderColor3">4279970357</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<token name="Font">3</token>
+							<token name="FontSize">5</token>
+							<string name="Name">Title</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0.0500000007</XS>
+								<XO>0</XO>
+								<YS>0.125</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0.449999988</XS>
+								<XO>0</XO>
+								<YS>0.75</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<string name="Text">CodeSync 2</string>
+							<Color3 name="TextColor3">4280229663</Color3>
+							<bool name="TextScaled">true</bool>
+							<Color3 name="TextStrokeColor3">4278190080</Color3>
+							<float name="TextStrokeTransparency">1</float>
+							<float name="TextTransparency">0</float>
+							<bool name="TextWrapped">true</bool>
+							<token name="TextXAlignment">0</token>
+							<token name="TextYAlignment">1</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+					</Item>
+					<Item class="TextLabel" referent="RBX19A084449FC54008B9E0DA602B92A46E">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4294967295</Color3>
+							<float name="BackgroundTransparency">1</float>
+							<Color3 name="BorderColor3">4279970357</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<token name="Font">3</token>
+							<token name="FontSize">5</token>
+							<string name="Name">SyncState</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0.5</XS>
+								<XO>0</XO>
+								<YS>0.25</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0.5</XS>
+								<XO>-50</XO>
+								<YS>0.5</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<string name="Text">Not syncing</string>
+							<Color3 name="TextColor3">4284506208</Color3>
+							<bool name="TextScaled">true</bool>
+							<Color3 name="TextStrokeColor3">4278190080</Color3>
+							<float name="TextStrokeTransparency">1</float>
+							<float name="TextTransparency">0</float>
+							<bool name="TextWrapped">true</bool>
+							<token name="TextXAlignment">1</token>
+							<token name="TextYAlignment">1</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+					</Item>
+					<Item class="ImageLabel" referent="RBXFECFA939496C40E3B972B9F86906D878">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4294967295</Color3>
+							<float name="BackgroundTransparency">1</float>
+							<Color3 name="BorderColor3">4279970357</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<Content name="Image"><url>rbxassetid://347774392</url></Content>
+							<Color3 name="ImageColor3">4294967295</Color3>
+							<Vector2 name="ImageRectOffset">
+								<X>0</X>
+								<Y>0</Y>
+							</Vector2>
+							<Vector2 name="ImageRectSize">
+								<X>0</X>
+								<Y>0</Y>
+							</Vector2>
+							<float name="ImageTransparency">0</float>
+							<string name="Name">ImageLabel</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>1</XS>
+								<XO>-45</XO>
+								<YS>0.5</YS>
+								<YO>-20</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<token name="ScaleType">0</token>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0</XS>
+								<XO>40</XO>
+								<YS>0</YS>
+								<YO>40</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<Rect2D name="SliceCenter">
+								<min>
+									<X>0</X>
+									<Y>0</Y>
+								</min>
+								<max>
+									<X>0</X>
+									<Y>0</Y>
+								</max>
+							</Rect2D>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="Frame" referent="RBX3EEA26A06C4344D88348814090676DBD">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4293980400</Color3>
+						<float name="BackgroundTransparency">0</float>
+						<Color3 name="BorderColor3">4284769380</Color3>
+						<int name="BorderSizePixel">1</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<string name="Name">Input</string>
+						<Ref name="NextSelectionDown">null</Ref>
+						<Ref name="NextSelectionLeft">null</Ref>
+						<Ref name="NextSelectionRight">null</Ref>
+						<Ref name="NextSelectionUp">null</Ref>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>48</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selectable">false</bool>
+						<Ref name="SelectionImageObject">null</Ref>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>86</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">0</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">1</int>
+					</Properties>
+					<Item class="TextButton" referent="RBXD723606F4AA743FAB7957EDD29354AE7">
+						<Properties>
+							<bool name="Active">true</bool>
+							<bool name="AutoButtonColor">true</bool>
+							<Color3 name="BackgroundColor3">4280329876</Color3>
+							<float name="BackgroundTransparency">0</float>
+							<Color3 name="BorderColor3">4284769380</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<token name="Font">4</token>
+							<token name="FontSize">7</token>
+							<bool name="Modal">false</bool>
+							<string name="Name">Toggle</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0.699999988</XS>
+								<XO>-10</XO>
+								<YS>0.100000001</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">true</bool>
+							<bool name="Selected">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0.300000012</XS>
+								<XO>0</XO>
+								<YS>0.400000006</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<token name="Style">0</token>
+							<string name="Text">Start</string>
+							<Color3 name="TextColor3">4293980400</Color3>
+							<bool name="TextScaled">false</bool>
+							<Color3 name="TextStrokeColor3">4278190080</Color3>
+							<float name="TextStrokeTransparency">0.899999976</float>
+							<float name="TextTransparency">0</float>
+							<bool name="TextWrapped">false</bool>
+							<token name="TextXAlignment">2</token>
+							<token name="TextYAlignment">1</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+					</Item>
+					<Item class="Frame" referent="RBX5E623BBFA092450ABB3E1A94B7DCF096">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4291348680</Color3>
+							<float name="BackgroundTransparency">0</float>
+							<Color3 name="BorderColor3">4284769380</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<string name="Name">Port</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0</XS>
+								<XO>10</XO>
+								<YS>0.100000001</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0.600000024</XS>
+								<XO>0</XO>
+								<YS>0.400000006</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<token name="Style">0</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+						<Item class="TextLabel" referent="RBX99541BB094784746BC93E6B76FAD5098">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4291348680</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<string name="Name">Hint</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>0</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>0.400000006</XS>
+									<XO>0</XO>
+									<YS>1</YS>
+									<YO>0</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">Port</string>
+								<Color3 name="TextColor3">4280229663</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+						<Item class="TextBox" referent="RBXDCB9A1C151254AF0896E183440A8871D">
+							<Properties>
+								<bool name="Active">true</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClearTextOnFocus">true</bool>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<bool name="MultiLine">false</bool>
+								<string name="Name">Box</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0.400000006</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>0</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">true</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>0.600000024</XS>
+									<XO>0</XO>
+									<YS>1</YS>
+									<YO>0</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">54321</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+					</Item>
+					<Item class="TextLabel" referent="RBX803CA19EBDC848E9865E51DA71598211">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4294967295</Color3>
+							<float name="BackgroundTransparency">1</float>
+							<Color3 name="BorderColor3">4279970357</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<token name="Font">3</token>
+							<token name="FontSize">6</token>
+							<string name="Name">Error</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0.0500000007</XS>
+								<XO>0</XO>
+								<YS>0.550000012</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0.899999976</XS>
+								<XO>0</XO>
+								<YS>0.400000006</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<string name="Text"></string>
+							<Color3 name="TextColor3">4280229663</Color3>
+							<bool name="TextScaled">false</bool>
+							<Color3 name="TextStrokeColor3">4292094506</Color3>
+							<float name="TextStrokeTransparency">0.875</float>
+							<float name="TextTransparency">0</float>
+							<bool name="TextWrapped">false</bool>
+							<token name="TextXAlignment">2</token>
+							<token name="TextYAlignment">1</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="Frame" referent="RBXD44B823A4F9B4503B62869209DFB9401">
+					<Properties>
+						<bool name="Active">false</bool>
+						<Color3 name="BackgroundColor3">4293980400</Color3>
+						<float name="BackgroundTransparency">0</float>
+						<Color3 name="BorderColor3">4284769380</Color3>
+						<int name="BorderSizePixel">1</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Draggable">false</bool>
+						<string name="Name">Info</string>
+						<Ref name="NextSelectionDown">null</Ref>
+						<Ref name="NextSelectionLeft">null</Ref>
+						<Ref name="NextSelectionRight">null</Ref>
+						<Ref name="NextSelectionUp">null</Ref>
+						<UDim2 name="Position">
+							<XS>0</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>139</YO>
+						</UDim2>
+						<float name="Rotation">0</float>
+						<bool name="Selectable">false</bool>
+						<Ref name="SelectionImageObject">null</Ref>
+						<UDim2 name="Size">
+							<XS>1</XS>
+							<XO>0</XO>
+							<YS>0</YS>
+							<YO>291</YO>
+						</UDim2>
+						<token name="SizeConstraint">0</token>
+						<token name="Style">0</token>
+						<bool name="Visible">true</bool>
+						<int name="ZIndex">1</int>
+					</Properties>
+					<Item class="Frame" referent="RBXF9E0F356274D4C4797EF1A28ECEAE577">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4293980400</Color3>
+							<float name="BackgroundTransparency">0</float>
+							<Color3 name="BorderColor3">4284769380</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<string name="Name">Mappings</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0.474999994</XS>
+								<XO>0</XO>
+								<YS>1</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<token name="Style">0</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+						<Item class="TextLabel" referent="RBX9521CAA2C293400594FB36E182DE364C">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">7</token>
+								<string name="Name">Title</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>0</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0.100000001</YS>
+									<YO>0</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">Mappings</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">2</int>
+							</Properties>
+						</Item>
+						<Item class="ScrollingFrame" referent="RBX7A346D54EFEA4731AB2B656C27F77008">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4291348680</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<Content name="BottomImage"><url>rbxasset://textures/ui/Scroll/scroll-bottom.png</url></Content>
+								<Vector2 name="CanvasPosition">
+									<X>0</X>
+									<Y>0</Y>
+								</Vector2>
+								<UDim2 name="CanvasSize">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>2</YS>
+									<YO>0</YO>
+								</UDim2>
+								<bool name="ClipsDescendants">true</bool>
+								<bool name="Draggable">false</bool>
+								<Content name="MidImage"><url>rbxasset://textures/ui/Scroll/scroll-middle.png</url></Content>
+								<string name="Name">List</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0.100000001</YS>
+									<YO>0</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<int name="ScrollBarThickness">5</int>
+								<bool name="ScrollingEnabled">true</bool>
+								<bool name="Selectable">true</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0.899999976</YS>
+									<YO>0</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<Content name="TopImage"><url>rbxasset://textures/ui/Scroll/scroll-top.png</url></Content>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+							<Item class="TextLabel" referent="RBX649C9DE8C8514E0480C72BC92BE40907">
+								<Properties>
+									<bool name="Active">false</bool>
+									<Color3 name="BackgroundColor3">4293980400</Color3>
+									<float name="BackgroundTransparency">0</float>
+									<Color3 name="BorderColor3">4284769380</Color3>
+									<int name="BorderSizePixel">1</int>
+									<bool name="ClipsDescendants">false</bool>
+									<bool name="Draggable">false</bool>
+									<token name="Font">3</token>
+									<token name="FontSize">6</token>
+									<string name="Name">Map</string>
+									<Ref name="NextSelectionDown">null</Ref>
+									<Ref name="NextSelectionLeft">null</Ref>
+									<Ref name="NextSelectionRight">null</Ref>
+									<Ref name="NextSelectionUp">null</Ref>
+									<UDim2 name="Position">
+										<XS>0</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>0</YO>
+									</UDim2>
+									<float name="Rotation">0</float>
+									<bool name="Selectable">false</bool>
+									<Ref name="SelectionImageObject">null</Ref>
+									<UDim2 name="Size">
+										<XS>1</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>60</YO>
+									</UDim2>
+									<token name="SizeConstraint">0</token>
+									<string name="Text"><![CDATA[D:\Documents\Example
+is mapped to
+game.ServerScriptService]]></string>
+									<Color3 name="TextColor3">4279970357</Color3>
+									<bool name="TextScaled">false</bool>
+									<Color3 name="TextStrokeColor3">4278190080</Color3>
+									<float name="TextStrokeTransparency">1</float>
+									<float name="TextTransparency">0</float>
+									<bool name="TextWrapped">false</bool>
+									<token name="TextXAlignment">2</token>
+									<token name="TextYAlignment">1</token>
+									<bool name="Visible">true</bool>
+									<int name="ZIndex">1</int>
+								</Properties>
+							</Item>
+							<Item class="TextLabel" referent="RBX2A8F07959D1C41FD9C398E5D78FE5264">
+								<Properties>
+									<bool name="Active">false</bool>
+									<Color3 name="BackgroundColor3">4293980400</Color3>
+									<float name="BackgroundTransparency">0</float>
+									<Color3 name="BorderColor3">4284769380</Color3>
+									<int name="BorderSizePixel">1</int>
+									<bool name="ClipsDescendants">false</bool>
+									<bool name="Draggable">false</bool>
+									<token name="Font">3</token>
+									<token name="FontSize">6</token>
+									<string name="Name">Map</string>
+									<Ref name="NextSelectionDown">null</Ref>
+									<Ref name="NextSelectionLeft">null</Ref>
+									<Ref name="NextSelectionRight">null</Ref>
+									<Ref name="NextSelectionUp">null</Ref>
+									<UDim2 name="Position">
+										<XS>0</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>65</YO>
+									</UDim2>
+									<float name="Rotation">0</float>
+									<bool name="Selectable">false</bool>
+									<Ref name="SelectionImageObject">null</Ref>
+									<UDim2 name="Size">
+										<XS>1</XS>
+										<XO>0</XO>
+										<YS>0</YS>
+										<YO>60</YO>
+									</UDim2>
+									<token name="SizeConstraint">0</token>
+									<string name="Text"><![CDATA[D:\Documents\Example
+is mapped to
+game.ServerScriptService]]></string>
+									<Color3 name="TextColor3">4279970357</Color3>
+									<bool name="TextScaled">false</bool>
+									<Color3 name="TextStrokeColor3">4278190080</Color3>
+									<float name="TextStrokeTransparency">1</float>
+									<float name="TextTransparency">0</float>
+									<bool name="TextWrapped">false</bool>
+									<token name="TextXAlignment">2</token>
+									<token name="TextYAlignment">1</token>
+									<bool name="Visible">true</bool>
+									<int name="ZIndex">1</int>
+								</Properties>
+							</Item>
+						</Item>
+					</Item>
+					<Item class="Frame" referent="RBX370C1B5B21974DC4A5EF78D95139815B">
+						<Properties>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">4294967295</Color3>
+							<float name="BackgroundTransparency">1</float>
+							<Color3 name="BorderColor3">4279970357</Color3>
+							<int name="BorderSizePixel">1</int>
+							<bool name="ClipsDescendants">false</bool>
+							<bool name="Draggable">false</bool>
+							<string name="Name">Miscellaneous</string>
+							<Ref name="NextSelectionDown">null</Ref>
+							<Ref name="NextSelectionLeft">null</Ref>
+							<Ref name="NextSelectionRight">null</Ref>
+							<Ref name="NextSelectionUp">null</Ref>
+							<UDim2 name="Position">
+								<XS>0.524999976</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>0</YO>
+							</UDim2>
+							<float name="Rotation">0</float>
+							<bool name="Selectable">false</bool>
+							<Ref name="SelectionImageObject">null</Ref>
+							<UDim2 name="Size">
+								<XS>0.474999994</XS>
+								<XO>0</XO>
+								<YS>1</YS>
+								<YO>0</YO>
+							</UDim2>
+							<token name="SizeConstraint">0</token>
+							<token name="Style">0</token>
+							<bool name="Visible">true</bool>
+							<int name="ZIndex">1</int>
+						</Properties>
+						<Item class="TextLabel" referent="RBX3192939BA6274AB9948643607DF3870E">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<string name="Name">Mode</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>0</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">Mode: One-Way</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX41E52195829B43E9B542D0910E5F201A">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<string name="Name">Authority</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">Authority: File System</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX0964E91EB1954A7ABE55838E6D06682B">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<string name="Name">RequestLimit</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>90</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">Request Limit: 0/250</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX82CD43539B764262ACB97DFE67E000ED">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<string name="Name">State</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>60</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">State: Idle</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX18B119AE8E8B42ACBE25E43931C2A92E">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<string name="Name">RequestErrors</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>120</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">Request Errors: 0</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX5CF0A3AC85C94E72B64E18B72764684B">
+							<Properties>
+								<bool name="Active">false</bool>
+								<Color3 name="BackgroundColor3">4293980400</Color3>
+								<float name="BackgroundTransparency">0</float>
+								<Color3 name="BorderColor3">4284769380</Color3>
+								<int name="BorderSizePixel">1</int>
+								<bool name="ClipsDescendants">false</bool>
+								<bool name="Draggable">false</bool>
+								<token name="Font">3</token>
+								<token name="FontSize">6</token>
+								<string name="Name">RequestErrors</string>
+								<Ref name="NextSelectionDown">null</Ref>
+								<Ref name="NextSelectionLeft">null</Ref>
+								<Ref name="NextSelectionRight">null</Ref>
+								<Ref name="NextSelectionUp">null</Ref>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>150</YO>
+								</UDim2>
+								<float name="Rotation">0</float>
+								<bool name="Selectable">false</bool>
+								<Ref name="SelectionImageObject">null</Ref>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<token name="SizeConstraint">0</token>
+								<string name="Text">Request Queue: 0</string>
+								<Color3 name="TextColor3">4279970357</Color3>
+								<bool name="TextScaled">false</bool>
+								<Color3 name="TextStrokeColor3">4278190080</Color3>
+								<float name="TextStrokeTransparency">1</float>
+								<float name="TextTransparency">0</float>
+								<bool name="TextWrapped">false</bool>
+								<token name="TextXAlignment">2</token>
+								<token name="TextYAlignment">1</token>
+								<bool name="Visible">true</bool>
+								<int name="ZIndex">1</int>
+							</Properties>
+						</Item>
+					</Item>
+				</Item>
+			</Item>
+		</Item>
+		<Item class="Folder" referent="RBX6222A55341E8449C9DF906C1AA25EB81">
+			<Properties>
+				<string name="Name">Modules</string>
+			</Properties>
+			<Item class="ModuleScript" referent="RBXE510C1B7FF7441B68B9EBF3FFC719631">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">NetworkBridge</string>
+					<ProtectedString name="Source"><![CDATA[-- Responsible for interacting with the file system web server.
+
+--------------------
+----- Services -----
+--------------------
+local HttpService = game:GetService("HttpService")
+
+---------------------
+----- Constants -----
+---------------------
+-- How many requests can be sent in a minute. Exceeding 500 will cause HttpService stalls.
+-- A limit less than 500 ensures that other HttpService-using plugins won't be drowned out by this.
+local REQUEST_LIMIT = 250
+
+-- How long to wait after a HttpService call limit overrun.
+local REQUEST_LIMIT_COOLDOWN = 15
+
+-- How many times to (re)try a request before failing. Should stop one-off HttpService errors.
+local REQUEST_TRIES = 2
+
+-- How long a request is considered 'active' and counting towards the limit
+local REQUEST_COOLDOWN = 60
+
+-- How long, in seconds, between request cooldown steps
+local STEP_DELAY = 1
+
+-- Local URL
+local BASE_URL = "http://localhost:%d/%s?%s"
+
+---------------------
+----- Variables -----
+---------------------
+-- How many queries were executed in the past 60 seconds
+local requestsUsed = 0
+
+-- How many HTTP errors have we encountered
+local errorCount = 0
+
+-- Records the times (via tick) of requests so the usage counter can be updated
+local requestTimes = {}
+
+-- Whether the step thread is currently running
+local stepping = false
+
+---------------------
+----- Functions -----
+---------------------
+local function StepQueue()
+	local current = tick()
+	
+	for i = #requestTimes, 1, -1 do
+		local requestTime = requestTimes[i]
+		
+		if current - requestTime > REQUEST_COOLDOWN then
+			requestsUsed = requestsUsed - 1
+			table.remove(requestTimes, i)
+		end
+	end
+end
+
+local function TryStartStepper()
+	if stepping then
+		return
+	end
+	
+	spawn(function()
+		stepping = true
+		
+		while stepping do
+			StepQueue()
+			stepping = #requestTimes > 0
+			wait(STEP_DELAY)
+		end
+	end)
+end
+
+local function PushRequestTime(requestTime)
+	requestsUsed = requestsUsed + 1
+	table.insert(requestTimes, requestTime)
+	TryStartStepper()
+end
+
+local function MakeRequest(queryUrl)
+	-- todo: better method?
+	if requestsUsed > REQUEST_LIMIT then
+		while requestsUsed > REQUEST_LIMIT do
+			wait(0)
+		end
+	end
+	
+	local success, message
+	local failCount = 0
+	
+	while failCount < REQUEST_TRIES do
+		-- rather than making a closure or a new function, just call it with HttpService
+		success, message = pcall(HttpService.GetAsync, HttpService, queryUrl, true)
+		PushRequestTime(tick())
+		
+		if not success then
+			-- Didn't just run into a HttpService stall
+			if message ~= "Number of requests exceeded limit" then
+				errorCount = errorCount + 1
+				failCount = failCount + 1
+			else
+				wait(REQUEST_LIMIT_COOLDOWN)
+			end
+		else
+			break
+		end
+	end
+	
+	return success, message
+end
+
+local function FormatUrl(port, target, arguments)
+	local argumentString = ""
+	
+	if arguments then
+		-- Temporary dumping table
+		local argumentStrings = {}
+		
+		-- Format arguments in normal form
+		for key, value in pairs(arguments) do
+			table.insert(argumentStrings, key.."="..HttpService:UrlEncode(tostring(value)))
+		end
+		
+		-- Generate argument string
+		argumentString = table.concat(argumentStrings, "&")
+	end
+	
+	return BASE_URL:format(port, target, argumentString)
+end
+
+-------------------
+----- Library -----
+-------------------
+local NetworkBridge = {}
+
+NetworkBridge.Port = 8453
+
+--- Summary ---
+-- Gets the current synchronization information, consisting of:
+-- * Mappings
+-- * Port
+-- * Sync mode and authority
+--- Returns ---
+-- [dictionary<string, variant>]: A dictionary containing information on the sync.
+function NetworkBridge.GetInfo()
+	local success, message = MakeRequest(FormatUrl(NetworkBridge.Port, "info"))
+	
+	if success then
+		local response = HttpService:JSONDecode(message)
+		local data = response.Data
+		return data
+	else
+		error("Error retrieving info: "..message)
+	end
+end
+
+--- Summary ---
+-- Gets the current scripts of the file system server.
+--- Returns ---
+-- An array of all the scripts.
+function NetworkBridge.GetScripts()
+	local success, message = MakeRequest(FormatUrl(NetworkBridge.Port, "scripts"))
+	
+	if success then
+		local response = HttpService:JSONDecode(message)
+		local data = response.Data
+		return data
+	else
+		error("Error retrieving scripts: "..message)
+	end
+end
+
+function NetworkBridge.GetChanges()
+	local success, message = MakeRequest(FormatUrl(NetworkBridge.Port, "changes"))
+	
+	if success then
+		local response = HttpService:JSONDecode(message)
+		local data = response.Data
+		return data
+	else
+		error("Error retrieving scripts: "..message)
+	end
+end
+
+function NetworkBridge.ReadFileAt(fullName)
+	local args = { location = fullName; }
+	local success, message = MakeRequest(FormatUrl(NetworkBridge.Port, "read", args))
+	
+	if success then
+		local response = HttpService:JSONDecode(message)
+		local data = response.Data
+		return data
+	else
+		error("Error retrieving script contents: "..message)
+	end
+end
+
+function NetworkBridge.GetInfo()
+	local success, message = MakeRequest(FormatUrl(NetworkBridge.Port, "info"))
+	
+	if success then
+		local response = HttpService:JSONDecode(message)
+		local data = response.Data
+		return data
+	else
+		error("Error getting info: "..message)
+	end
+end
+
+function NetworkBridge.GetRequestQueue()
+	return requestsUsed
+end
+
+function NetworkBridge.GetMaxRequests()
+	return REQUEST_LIMIT
+end
+
+function NetworkBridge.GetErrors()
+	return errorCount
+end
+
+return NetworkBridge]]></ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBXC6441782A20E4CD586799BF13BB18433">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Path</string>
+					<ProtectedString name="Source"><![CDATA[-- Responsible for handling paths.
+-------------------
+----- Library -----
+-------------------
+local Path = {}
+
+function Path.Normalize(pathString)
+	-- Trim whitespace
+	pathString = pathString:gsub("^%s+", "")
+	pathString = pathString:gsub("%s+$", "")
+	-- Remove anything with two consecutive separators
+	pathString = pathString:gsub("%.%.+", ".")
+	-- Remove any leading separators
+	pathString = pathString:gsub("^%.+", "")
+	-- Remove any trailing separators
+	pathString = pathString:gsub("%.+$", "")
+	
+	return pathString
+end
+
+function Path.Join(path1, path2)
+	return Path.Normalize(path1) + "." + Path.Normalize(path2)
+end
+
+function Path.MakeRelative(absolutePath, rootPath)
+	absolutePath = Path.Normalize(absolutePath)
+	rootPath = Path.Normalize(rootPath)
+	
+	local relativePath = absolutePath:gsub(rootPath..".", "")
+	return relativePath
+end
+
+function Path.MakeAbsolute(relativePath, rootPath)
+	relativePath = Path.Normalize(relativePath)
+	rootPath = Path.Normalize(rootPath)
+	
+	local absolutePath = rootPath.."."..relativePath
+	return absolutePath
+end
+
+function Path.Traverse(path, start, createMissing)
+	if path:match("^game%.") then
+		path = path:gsub("^game%.", "")
+	end
+	
+	path = Path.Normalize(path)
+	
+	local chunks = {}
+	for chunk in path:gmatch("[^%.]+") do
+		table.insert(chunks, chunk)
+	end
+	
+	local level = start
+	
+	for index, chunk in ipairs(chunks) do
+		if index == #chunks then
+			return level, chunk
+		else
+			local nextLevel = level:FindFirstChild(chunk)
+			
+			if not nextLevel then
+				if createMissing then
+					nextLevel = Instance.new("Folder")
+					nextLevel.Name = chunk
+					nextLevel.Parent = level
+				else
+					return false
+				end
+			end
+			
+			level = nextLevel
+		end
+	end
+end
+
+return Path]]></ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX44FF3967404A4E5C9A70E8B4350542C1">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">ScriptType</string>
+					<ProtectedString name="Source"><![CDATA[local ScriptType = {}
+
+ScriptType.Types = {
+	Server = 0,
+	Local = 1,
+	Module = 2,
+}
+
+local TypeNames = {
+	[ScriptType.Types.Server] = "Script";
+	[ScriptType.Types.Local] = "LocalScript";
+	[ScriptType.Types.Module] = "ModuleScript";
+}
+
+function ScriptType.GetTypeFromInstance(instance)
+	if instance:IsA("ModuleScript") then
+		return ScriptType.Types.Module
+	elseif instance:IsA("LocalScript") then
+		return ScriptType.Types.Local
+	elseif instance:IsA("Script") then
+		return ScriptType.Types.Server
+	else
+		error(instance.ClassName.." is not supported")
+	end
+end
+
+function ScriptType.GetClassFromType(scriptType)
+	return TypeNames[scriptType]
+end
+
+return ScriptType]]></ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBXE36174771D87463F826BAC66302CA56C">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Signal</string>
+					<ProtectedString name="Source"><![CDATA[-- A Lua-controlled event.
+
+-----------------
+----- Class -----
+-----------------
+local Signal = {}
+Signal.__index = Signal
+
+function Signal.new()
+	local self = setmetatable({
+		_args = {};
+		_object = Instance.new("BindableEvent");
+	}, Signal)
+	
+	return self
+end
+
+function Signal:Connect(listener)
+	return self._object.Event:connect(function()
+		listener(unpack(self._args))
+	end)
+end
+Signal.connect = Signal.Connect
+
+function Signal:Fire(...)
+	self._args = {...}
+	self._object:Fire()
+end
+
+function Signal:Wait()
+	self._object.Event:wait()
+	return unpack(self._args)
+end
+
+return Signal]]></ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX12AE69F141884CADA3625E1F1CE0A526">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">SyncHandler</string>
+					<ProtectedString name="Source"><![CDATA[local NetworkBridge = require(script.Parent.NetworkBridge)
+local Path = require(script.Parent.Path)
+local ScriptType = require(script.Parent.ScriptType)
+
+local function RemoveEmptyFolders(level)
+	while level:GetChildren() <= 0 do
+		local nextLevel = level.Parent
+		level:Destroy()
+		level = nextLevel
+	end
+end
+
+local SyncHandler = {}
+SyncHandler.__index = SyncHandler
+
+function SyncHandler.new(port, mappings)
+	local self = setmetatable({}, SyncHandler)
+	self.MappingInfo = mappings
+	self.Mappings = {}
+	self.Port = port
+	self.Scripts = {}
+	self.IsSyncing = false
+	
+	return self
+end
+
+function SyncHandler:Start()
+	print("sync starting!")
+	NetworkBridge.Port = self.Port
+	print("network bridge acting on port "..self.Port)
+	
+	for index, mapping in ipairs(self.MappingInfo) do
+		print("acquiring object for mapping #"..index.." ("..mapping["absoluteDisk"].." <-> "..mapping["roblox"]..")")
+		local parent, name = Path.Traverse(mapping["roblox"], game, true)
+		
+		local object = parent:FindFirstChild(name)
+		if not object then
+			object = Instance.new("Folder", parent)
+			object.Name = name
+		end
+		
+		print("acquired object!")
+		
+		local realMapping = {
+			Object = object;
+			RobloxPath = mapping["roblox"];
+			FsPath = mapping["absoluteDisk"];
+		}
+		
+		table.insert(self.Mappings, realMapping)
+		print("mapping initialized")
+	end
+	
+	-- TODO: only clear if sync authority is FS
+	print("clearing mapping objects")
+	for _, mapping in ipairs(self.Mappings) do
+		mapping.Object:ClearAllChildren()
+	end
+	
+	print("reading scripts")
+	for _, scriptInfo in ipairs(NetworkBridge.GetScripts()) do
+		print("initial sync: "..scriptInfo.RobloxPath)
+		local parent, name = Path.Traverse(scriptInfo.RobloxPath, game, true)
+		local content = NetworkBridge.ReadFileAt(scriptInfo.RobloxPath)
+		local instanceClass = ScriptType.GetClassFromType(scriptInfo.Type)
+		local object = parent:FindFirstChild(name)
+		
+		if object and not object:IsA(instanceClass) then
+			object:Destroy()
+			object = nil
+		end
+		
+		if not object then
+			object = Instance.new(instanceClass, parent)
+			object.Name = name
+		end
+		
+		object.Source = content
+	end
+	
+	print("initial sync is done")
+end
+
+function SyncHandler:Update()
+	local changes = NetworkBridge.GetChanges()
+	print("replicating "..#changes.." change(s)")
+	
+	for _, change in ipairs(changes) do
+		print("change to "..change.ChangedScript.RobloxPath.." of type "..change.Type)
+		
+		-- Write
+		if change.Type == 0 then
+			local parent, name = Path.Traverse(change.ChangedScript.RobloxPath, game, true)
+			local content = NetworkBridge.ReadFileAt(change.ChangedScript.RobloxPath)
+			local instanceClass = ScriptType.GetClassFromType(change.ChangedScript.Type)
+			local object = parent:FindFirstChild(name)
+			
+			if object and not object:IsA(instanceClass) then
+				object:Destroy()
+				object = nil
+			end
+			
+			if not object then
+				object = Instance.new(instanceClass, parent)
+				object.Name = name
+			end
+			
+			if object.Source ~= change.NewContent then
+				object.Source = change.NewContent
+				print("wrote to "..change.ChangedScript.RobloxPath)
+			end
+		-- Delete
+		elseif change.Type == 1 then
+			local parent, name = Path.Traverse(change.ChangedScript.RobloxPath, game)
+			
+			-- possible that the parent got destroyed here too
+			if parent and parent:FindFirstChild(name) then
+				parent[name]:Destroy()
+				
+				-- crawl upwards
+				RemoveEmptyFolders(parent)
+			end
+			
+			print("removed "..change.ChangedScript.RobloxPath)
+		-- ???
+		else
+			warn("unknown change type: "..change.Type)
+		end
+	end
+	
+	print("done updating")
+end
+
+return SyncHandler]]></ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX8EDEBCD5D4524C7DB455FF7C6CDEFCBD">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">UserInterfaceBridge</string>
+					<ProtectedString name="Source"><![CDATA[-- Responsible for controlling the UI.
+
+--------------------
+----- Services -----
+--------------------
+local CoreGui = game:GetService("CoreGui")
+
+---------------------
+----- Constants -----
+---------------------
+local OPEN_SIZE = UDim2.new(0, 580, 0, 430)
+local CLOSED_SIZE = UDim2.new(0, 580, 0, 129)
+
+local OPEN_POSITION = UDim2.new(0.5, -290, 0.5, -215)
+local CLOSED_POSITION = UDim2.new(0.5, -290, 0.5, -65)
+
+local ENABLED_COLOR = Color3.new(32 / 255, 166 / 255, 148 / 255)
+local DISABLED_COLOR = Color3.new(200 / 255, 200 / 255, 200 / 255)
+
+---------------------
+----- Variables -----
+---------------------
+local ui = script.CodeSync2
+local container = ui.Container
+local errorLabel = container.Input.Error
+local toggleButton = container.Input.Toggle
+local portInput = container.Input.Port.Box
+
+local uiOpen = false
+local infoOpen = false
+
+-------------------
+----- Library -----
+-------------------
+local UserInterfaceBridge = {}
+
+function UserInterfaceBridge.SetUiOpen(open)
+	ui.Parent = open and CoreGui or script
+	uiOpen = open
+end
+
+function UserInterfaceBridge.HideUi()
+	UserInterfaceBridge.SetUiOpen(false)
+end
+
+function UserInterfaceBridge.ShowUi()
+	UserInterfaceBridge.SetUiOpen(true)
+end
+
+function UserInterfaceBridge.IsOpen()
+	return uiOpen
+end
+
+function UserInterfaceBridge.SetInfoShown(shown)
+	infoOpen = shown
+	
+	local newPosition, newSize
+	
+	if infoOpen then
+		newPosition = OPEN_POSITION
+		newSize = OPEN_SIZE
+	else
+		newPosition = CLOSED_POSITION
+		newSize = CLOSED_SIZE
+	end
+	
+	if uiOpen then
+		container:TweenPosition(newPosition, Enum.EasingDirection.InOut, Enum.EasingStyle.Sine, 0.15, true)
+		container:TweenSize(newSize, Enum.EasingDirection.InOut, Enum.EasingStyle.Sine, 0.15, true)
+	else
+		container.Position = newPosition
+		container.Size = newSize
+	end
+end
+
+function UserInterfaceBridge.ShowInfo()
+	UserInterfaceBridge.SetInfoShown(true)
+end
+
+function UserInterfaceBridge.HideInfo()
+	UserInterfaceBridge.SetInfoShown(false)
+end
+
+function UserInterfaceBridge.SetErrorMessage(message)
+	errorLabel.Text = message
+end
+
+function UserInterfaceBridge.FreezeUi()
+	portInput.Enabled = false
+	toggleButton.Enabled = false
+	toggleButton.BackgroundColor3 = DISABLED_COLOR
+end
+
+function UserInterfaceBridge.ThawUi()
+	portInput.Enabled = true
+	toggleButton.Enabled = true
+	toggleButton.BackgroundColor3 = ENABLED_COLOR
+end
+
+function UserInterfaceBridge.GetPort()
+	return tonumber(portInput.Text)
+end
+
+function UserInterfaceBridge.SetPort(port)
+	portInput.Text = port
+end
+
+function UserInterfaceBridge.SetToggleText(text)
+	toggleButton.Text = text
+end
+
+UserInterfaceBridge.OnTogglePressed = toggleButton.MouseButton1Down
+
+return UserInterfaceBridge]]></ProtectedString>
+				</Properties>
+			</Item>
+		</Item>
+	</Item>
+</roblox>

@@ -1,0 +1,9 @@
+{
+	"port": 8453,
+	"mappings": [
+		{
+			"disk": "Code",
+			"roblox": "game.ServerScriptService.CodeSync2"
+		}
+	]
+}
