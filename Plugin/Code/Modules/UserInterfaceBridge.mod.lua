@@ -25,6 +25,8 @@ local container = ui.Container
 local errorLabel = container.Input.Error
 local toggleButton = container.Input.Toggle
 local portInput = container.Input.Port.Box
+local syncState = container.Top.SyncState
+local icon = container.Top.Icon
 
 local uiOpen = false
 local infoOpen = false
@@ -117,9 +119,13 @@ end
 
 function UserInterfaceBridge.SetSyncing(syncing)
 	if syncing then
+		syncState.Text = "Syncing"
 		toggleButton.Text = "Stop"
+		icon.ImageColor3 = Color3.new(1, 1, 1)
 	else
+		syncState.Text = "Idle"
 		toggleButton.Text = "Start"
+		icon.ImageColor3 = Color3.new(0.5, 0.5, 0.5)
 	end
 end
 
