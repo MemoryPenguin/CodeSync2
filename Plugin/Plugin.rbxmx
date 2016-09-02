@@ -48,33 +48,39 @@ end)
 local syncing = false
 
 UserInterfaceBridge.OnTogglePressed:connect(function()
-	syncing = false
-	
-	local port = UserInterfaceBridge.GetPort()
-	
-	if not port then
-		UserInterfaceBridge.SetErrorMessage("Port should be a number between 1 and 65355")
-		return
-	end
-	
-	NetworkBridge.Port = port
-	local success, info = pcall(NetworkBridge.GetInfo)
-	if not success then
-		UserInterfaceBridge.SetErrorMessage("Couldn't retrieve sync info; see output for more information")
-		warn(info)
-		return
-	end
-	
-	local handler = SyncHandler.new(port, info.mappings)
-	handler:Start()
-	plugin:SetSetting("LastPort", port)
-	
-	local start = tick()
-	syncing = start
-	
-	while syncing == start do
-		wait(1)
-		handler:Update()
+	if syncing ~= false then
+		syncing = false
+		UserInterfaceBridge.SetSyncing(false)
+	else
+		local port = UserInterfaceBridge.GetPort()
+		
+		if not port then
+			UserInterfaceBridge.SetErrorMessage("Port should be a number between 1 and 65355")
+			return
+		end
+		
+		NetworkBridge.Port = port
+		local success, info = pcall(NetworkBridge.GetInfo)
+		if not success then
+			UserInterfaceBridge.SetErrorMessage("Couldn't retrieve sync info; see output for more information")
+			warn(info)
+			return
+		end
+
+		UserInterfaceBridge.SetErrorMessage("")
+		
+		local handler = SyncHandler.new(port, info.mappings)
+		handler:Start()
+		plugin:SetSetting("LastPort", port)
+		
+		local start = tick()
+		syncing = start
+		UserInterfaceBridge.SetSyncing(true)
+		
+		while syncing == start do
+			wait(1)
+			handler:Update()
+		end
 	end
 end)
 
@@ -512,12 +518,10 @@ function SyncHandler.new(port, mappings)
 end
 
 function SyncHandler:Start()
-	print("sync starting!")
 	NetworkBridge.Port = self.Port
-	print("network bridge acting on port "..self.Port)
+	print("Network bridge acting on port "..self.Port)
 	
 	for index, mapping in ipairs(self.MappingInfo) do
-		print("acquiring object for mapping #"..index.." ("..mapping["absoluteDisk"].." <-> "..mapping["roblox"]..")")
 		local parent, name = Path.Traverse(mapping["roblox"], game, true)
 		
 		local object = parent:FindFirstChild(name)
@@ -526,8 +530,6 @@ function SyncHandler:Start()
 			object.Name = name
 		end
 		
-		print("acquired object!")
-		
 		local realMapping = {
 			Object = object;
 			RobloxPath = mapping["roblox"];
@@ -535,18 +537,18 @@ function SyncHandler:Start()
 		}
 		
 		table.insert(self.Mappings, realMapping)
-		print("mapping initialized")
+		print("Initialized mapping #"..index.." ("..mapping["absoluteDisk"].." <-> "..mapping["roblox"]..")")
 	end
 	
 	-- TODO: only clear if sync authority is FS
-	print("clearing mapping objects")
+	print("Clearing contents of mapping objects.")
 	for _, mapping in ipairs(self.Mappings) do
 		mapping.Object:ClearAllChildren()
 	end
 	
-	print("reading scripts")
+	print("Reading scripts")
 	for _, scriptInfo in ipairs(NetworkBridge.GetScripts()) do
-		print("initial sync: "..scriptInfo.RobloxPath)
+		print("Performing initial sync of "..scriptInfo.FilePath.." to "..scriptInfo.RobloxPath)
 		local parent, name = Path.Traverse(scriptInfo.RobloxPath, game, true)
 		local content = NetworkBridge.ReadFileAt(scriptInfo.RobloxPath)
 		local instanceClass = ScriptType.GetClassFromType(scriptInfo.Type)
@@ -564,17 +566,11 @@ function SyncHandler:Start()
 		
 		object.Source = content
 	end
-	
-	print("initial sync is done")
 end
 
 function SyncHandler:Update()
 	local changes = NetworkBridge.GetChanges()
-	print("replicating "..#changes.." change(s)")
-	
 	for _, change in ipairs(changes) do
-		print("change to "..change.ChangedScript.RobloxPath.." of type "..change.Type)
-		
 		-- Write
 		if change.Type == 0 then
 			local parent, name = Path.Traverse(change.ChangedScript.RobloxPath, game, true)
@@ -590,11 +586,12 @@ function SyncHandler:Update()
 			if not object then
 				object = Instance.new(instanceClass, parent)
 				object.Name = name
+				print("Made object for "..change.ChangedScript.RobloxPath)
 			end
 			
 			if object.Source ~= change.NewContent then
 				object.Source = change.NewContent
-				print("wrote to "..change.ChangedScript.RobloxPath)
+				print("Wrote to "..change.ChangedScript.RobloxPath)
 			end
 		-- Delete
 		elseif change.Type == 1 then
@@ -608,14 +605,12 @@ function SyncHandler:Update()
 				RemoveEmptyFolders(parent)
 			end
 			
-			print("removed "..change.ChangedScript.RobloxPath)
+			print("Removed "..change.ChangedScript.RobloxPath)
 		-- ???
 		else
-			warn("unknown change type: "..change.Type)
+			warn("Unknown change type: "..change.Type)
 		end
 	end
-	
-	print("done updating")
 end
 
 return SyncHandler]]></ProtectedString>
@@ -648,7 +643,7 @@ local DISABLED_COLOR = Color3.new(200 / 255, 200 / 255, 200 / 255)
 ---------------------
 ----- Variables -----
 ---------------------
-local ui = script.CodeSync2
+local ui = script.CodeSync2Gui
 local container = ui.Container
 local errorLabel = container.Input.Error
 local toggleButton = container.Input.Toggle
@@ -693,8 +688,14 @@ function UserInterfaceBridge.SetInfoShown(shown)
 	end
 	
 	if uiOpen then
-		container:TweenPosition(newPosition, Enum.EasingDirection.InOut, Enum.EasingStyle.Sine, 0.15, true)
-		container:TweenSize(newSize, Enum.EasingDirection.InOut, Enum.EasingStyle.Sine, 0.15, true)
+		container:TweenSizeAndPosition(
+			newSize,
+			newPosition,
+			Enum.EasingDirection.InOut,
+			Enum.EasingStyle.Sine,
+			0.15, 
+			true
+		)
 	else
 		container.Position = newPosition
 		container.Size = newSize
@@ -735,6 +736,14 @@ end
 
 function UserInterfaceBridge.SetToggleText(text)
 	toggleButton.Text = text
+end
+
+function UserInterfaceBridge.SetSyncing(syncing)
+	if syncing then
+		toggleButton.Text = "Stop"
+	else
+		toggleButton.Text = "Start"
+	end
 end
 
 UserInterfaceBridge.OnTogglePressed = toggleButton.MouseButton1Down

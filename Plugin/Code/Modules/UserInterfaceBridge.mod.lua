@@ -20,7 +20,7 @@ local DISABLED_COLOR = Color3.new(200 / 255, 200 / 255, 200 / 255)
 ---------------------
 ----- Variables -----
 ---------------------
-local ui = script.CodeSync2
+local ui = script.CodeSync2Gui
 local container = ui.Container
 local errorLabel = container.Input.Error
 local toggleButton = container.Input.Toggle
@@ -65,8 +65,14 @@ function UserInterfaceBridge.SetInfoShown(shown)
 	end
 	
 	if uiOpen then
-		container:TweenPosition(newPosition, Enum.EasingDirection.InOut, Enum.EasingStyle.Sine, 0.15, true)
-		container:TweenSize(newSize, Enum.EasingDirection.InOut, Enum.EasingStyle.Sine, 0.15, true)
+		container:TweenSizeAndPosition(
+			newSize,
+			newPosition,
+			Enum.EasingDirection.InOut,
+			Enum.EasingStyle.Sine,
+			0.15, 
+			true
+		)
 	else
 		container.Position = newPosition
 		container.Size = newSize
@@ -107,6 +113,14 @@ end
 
 function UserInterfaceBridge.SetToggleText(text)
 	toggleButton.Text = text
+end
+
+function UserInterfaceBridge.SetSyncing(syncing)
+	if syncing then
+		toggleButton.Text = "Stop"
+	else
+		toggleButton.Text = "Start"
+	end
 end
 
 UserInterfaceBridge.OnTogglePressed = toggleButton.MouseButton1Down

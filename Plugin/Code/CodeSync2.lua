@@ -35,33 +35,39 @@ end)
 local syncing = false
 
 UserInterfaceBridge.OnTogglePressed:connect(function()
-	syncing = false
-	
-	local port = UserInterfaceBridge.GetPort()
-	
-	if not port then
-		UserInterfaceBridge.SetErrorMessage("Port should be a number between 1 and 65355")
-		return
-	end
-	
-	NetworkBridge.Port = port
-	local success, info = pcall(NetworkBridge.GetInfo)
-	if not success then
-		UserInterfaceBridge.SetErrorMessage("Couldn't retrieve sync info; see output for more information")
-		warn(info)
-		return
-	end
-	
-	local handler = SyncHandler.new(port, info.mappings)
-	handler:Start()
-	plugin:SetSetting("LastPort", port)
-	
-	local start = tick()
-	syncing = start
-	
-	while syncing == start do
-		wait(1)
-		handler:Update()
+	if syncing ~= false then
+		syncing = false
+		UserInterfaceBridge.SetSyncing(false)
+	else
+		local port = UserInterfaceBridge.GetPort()
+		
+		if not port then
+			UserInterfaceBridge.SetErrorMessage("Port should be a number between 1 and 65355")
+			return
+		end
+		
+		NetworkBridge.Port = port
+		local success, info = pcall(NetworkBridge.GetInfo)
+		if not success then
+			UserInterfaceBridge.SetErrorMessage("Couldn't retrieve sync info; see output for more information")
+			warn(info)
+			return
+		end
+
+		UserInterfaceBridge.SetErrorMessage("")
+		
+		local handler = SyncHandler.new(port, info.mappings)
+		handler:Start()
+		plugin:SetSetting("LastPort", port)
+		
+		local start = tick()
+		syncing = start
+		UserInterfaceBridge.SetSyncing(true)
+		
+		while syncing == start do
+			wait(1)
+			handler:Update()
+		end
 	end
 end)
 

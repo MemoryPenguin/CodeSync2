@@ -25,12 +25,10 @@ function SyncHandler.new(port, mappings)
 end
 
 function SyncHandler:Start()
-	print("sync starting!")
 	NetworkBridge.Port = self.Port
-	print("network bridge acting on port "..self.Port)
+	print("Network bridge acting on port "..self.Port)
 	
 	for index, mapping in ipairs(self.MappingInfo) do
-		print("acquiring object for mapping #"..index.." ("..mapping["absoluteDisk"].." <-> "..mapping["roblox"]..")")
 		local parent, name = Path.Traverse(mapping["roblox"], game, true)
 		
 		local object = parent:FindFirstChild(name)
@@ -39,8 +37,6 @@ function SyncHandler:Start()
 			object.Name = name
 		end
 		
-		print("acquired object!")
-		
 		local realMapping = {
 			Object = object;
 			RobloxPath = mapping["roblox"];
@@ -48,18 +44,18 @@ function SyncHandler:Start()
 		}
 		
 		table.insert(self.Mappings, realMapping)
-		print("mapping initialized")
+		print("Initialized mapping #"..index.." ("..mapping["absoluteDisk"].." <-> "..mapping["roblox"]..")")
 	end
 	
 	-- TODO: only clear if sync authority is FS
-	print("clearing mapping objects")
+	print("Clearing contents of mapping objects.")
 	for _, mapping in ipairs(self.Mappings) do
 		mapping.Object:ClearAllChildren()
 	end
 	
-	print("reading scripts")
+	print("Reading scripts")
 	for _, scriptInfo in ipairs(NetworkBridge.GetScripts()) do
-		print("initial sync: "..scriptInfo.RobloxPath)
+		print("Performing initial sync of "..scriptInfo.FilePath.." to "..scriptInfo.RobloxPath)
 		local parent, name = Path.Traverse(scriptInfo.RobloxPath, game, true)
 		local content = NetworkBridge.ReadFileAt(scriptInfo.RobloxPath)
 		local instanceClass = ScriptType.GetClassFromType(scriptInfo.Type)
@@ -77,17 +73,11 @@ function SyncHandler:Start()
 		
 		object.Source = content
 	end
-	
-	print("initial sync is done")
 end
 
 function SyncHandler:Update()
 	local changes = NetworkBridge.GetChanges()
-	print("replicating "..#changes.." change(s)")
-	
 	for _, change in ipairs(changes) do
-		print("change to "..change.ChangedScript.RobloxPath.." of type "..change.Type)
-		
 		-- Write
 		if change.Type == 0 then
 			local parent, name = Path.Traverse(change.ChangedScript.RobloxPath, game, true)
@@ -103,11 +93,12 @@ function SyncHandler:Update()
 			if not object then
 				object = Instance.new(instanceClass, parent)
 				object.Name = name
+				print("Made object for "..change.ChangedScript.RobloxPath)
 			end
 			
 			if object.Source ~= change.NewContent then
 				object.Source = change.NewContent
-				print("wrote to "..change.ChangedScript.RobloxPath)
+				print("Wrote to "..change.ChangedScript.RobloxPath)
 			end
 		-- Delete
 		elseif change.Type == 1 then
@@ -121,14 +112,12 @@ function SyncHandler:Update()
 				RemoveEmptyFolders(parent)
 			end
 			
-			print("removed "..change.ChangedScript.RobloxPath)
+			print("Removed "..change.ChangedScript.RobloxPath)
 		-- ???
 		else
-			warn("unknown change type: "..change.Type)
+			warn("Unknown change type: "..change.Type)
 		end
 	end
-	
-	print("done updating")
 end
 
 return SyncHandler
