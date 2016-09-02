@@ -10,9 +10,13 @@
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">CodeSync2</string>
-				<ProtectedString name="Source"><![CDATA[local NetworkBridge = require(script.NetworkBridge)
-local UserInterfaceBridge = require(script.UserInterfaceBridge)
-local SyncHandler = require(script.SyncHandler)
+				<string name="ScriptGuid"></string>
+				<ProtectedString name="Source"><![CDATA[-- squelch warnings
+plugin = plugin
+
+local NetworkBridge = require(plugin.Modules.NetworkBridge)
+local UserInterfaceBridge = require(plugin.Modules.UserInterfaceBridge)
+local SyncHandler = require(plugin.Modules.SyncHandler)
 
 local function FormatTable(t, indentLevel)
 	indentLevel = indentLevel or 0
@@ -31,9 +35,6 @@ local function FormatTable(t, indentLevel)
 	
 	return result..("\t"):format():rep(indentLevel).."}"
 end
-
--- squelch warnings
-plugin = plugin
 
 local toolbar = plugin:CreateToolbar("CodeSync 2")
 local button = toolbar:CreateButton("CodeSync 2", "Opens the CodeSync 2 user interface, allowing you to synchronize files across your computer and Studio.", "rbxassetid://347676411")
@@ -1128,6 +1129,7 @@ game.ServerScriptService]]></string>
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">NetworkBridge</string>
+					<string name="ScriptGuid"></string>
 					<ProtectedString name="Source"><![CDATA[-- Responsible for interacting with the file system web server.
 
 --------------------
@@ -1359,6 +1361,7 @@ return NetworkBridge]]></ProtectedString>
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Path</string>
+					<string name="ScriptGuid"></string>
 					<ProtectedString name="Source"><![CDATA[-- Responsible for handling paths.
 -------------------
 ----- Library -----
@@ -1441,6 +1444,7 @@ return Path]]></ProtectedString>
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">ScriptType</string>
+					<string name="ScriptGuid"></string>
 					<ProtectedString name="Source"><![CDATA[local ScriptType = {}
 
 ScriptType.Types = {
@@ -1478,6 +1482,7 @@ return ScriptType]]></ProtectedString>
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">Signal</string>
+					<string name="ScriptGuid"></string>
 					<ProtectedString name="Source"><![CDATA[-- A Lua-controlled event.
 
 -----------------
@@ -1519,6 +1524,7 @@ return Signal]]></ProtectedString>
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">SyncHandler</string>
+					<string name="ScriptGuid"></string>
 					<ProtectedString name="Source"><![CDATA[local NetworkBridge = require(script.Parent.NetworkBridge)
 local Path = require(script.Parent.Path)
 local ScriptType = require(script.Parent.ScriptType)
@@ -1659,6 +1665,7 @@ return SyncHandler]]></ProtectedString>
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">UserInterfaceBridge</string>
+					<string name="ScriptGuid"></string>
 					<ProtectedString name="Source"><![CDATA[-- Responsible for controlling the UI.
 
 --------------------
