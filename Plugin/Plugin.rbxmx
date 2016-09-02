@@ -648,6 +648,8 @@ local container = ui.Container
 local errorLabel = container.Input.Error
 local toggleButton = container.Input.Toggle
 local portInput = container.Input.Port.Box
+local syncState = container.Top.SyncState
+local icon = container.Top.Icon
 
 local uiOpen = false
 local infoOpen = false
@@ -740,9 +742,13 @@ end
 
 function UserInterfaceBridge.SetSyncing(syncing)
 	if syncing then
+		syncState.Text = "Syncing"
 		toggleButton.Text = "Stop"
+		icon.ImageColor3 = Color3.new(1, 1, 1)
 	else
+		syncState.Text = "Idle"
 		toggleButton.Text = "Start"
+		icon.ImageColor3 = Color3.new(0.5, 0.5, 0.5)
 	end
 end
 
@@ -750,11 +756,11 @@ UserInterfaceBridge.OnTogglePressed = toggleButton.MouseButton1Down
 
 return UserInterfaceBridge]]></ProtectedString>
 				</Properties>
-				<Item class="ScreenGui" referent="RBX6F4089B2CC194B5FABB0792088D0641E">
+				<Item class="ScreenGui" referent="RBXF9FD488AC77D4D188CA097C849E24B9D">
 					<Properties>
 						<string name="Name">CodeSync2Gui</string>
 					</Properties>
-					<Item class="Frame" referent="RBX88D9C3A956A947A3A1215CEBA4922183">
+					<Item class="Frame" referent="RBX9FB47FF189D448CE9A8214D29A3EE617">
 						<Properties>
 							<bool name="Active">false</bool>
 							<Color3 name="BackgroundColor3">4291348680</Color3>
@@ -788,7 +794,7 @@ return UserInterfaceBridge]]></ProtectedString>
 							<bool name="Visible">true</bool>
 							<int name="ZIndex">1</int>
 						</Properties>
-						<Item class="Frame" referent="RBX157DE3FF04B4473AA95A9B5513627D37">
+						<Item class="Frame" referent="RBX69CCC565A6F6423B9E6D9308B7922998">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -822,7 +828,7 @@ return UserInterfaceBridge]]></ProtectedString>
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="TextLabel" referent="RBX05E86FA6A4B2453A88A8C6A41ACE31B3">
+							<Item class="TextLabel" referent="RBX20E71E9D4D4B4BB38ECF14A1671841EA">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -867,7 +873,7 @@ return UserInterfaceBridge]]></ProtectedString>
 									<int name="ZIndex">1</int>
 								</Properties>
 							</Item>
-							<Item class="TextLabel" referent="RBX19A084449FC54008B9E0DA602B92A46E">
+							<Item class="TextLabel" referent="RBX686E344427CD4B37AD21B029F297565A">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -899,7 +905,7 @@ return UserInterfaceBridge]]></ProtectedString>
 										<YO>0</YO>
 									</UDim2>
 									<token name="SizeConstraint">0</token>
-									<string name="Text">Not syncing</string>
+									<string name="Text">Idle</string>
 									<Color3 name="TextColor3">4284506208</Color3>
 									<bool name="TextScaled">true</bool>
 									<Color3 name="TextStrokeColor3">4278190080</Color3>
@@ -912,7 +918,7 @@ return UserInterfaceBridge]]></ProtectedString>
 									<int name="ZIndex">1</int>
 								</Properties>
 							</Item>
-							<Item class="ImageLabel" referent="RBXFECFA939496C40E3B972B9F86906D878">
+							<Item class="ImageLabel" referent="RBXDB0287829D9A4133A20FCECC3303A502">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -922,7 +928,7 @@ return UserInterfaceBridge]]></ProtectedString>
 									<bool name="ClipsDescendants">false</bool>
 									<bool name="Draggable">false</bool>
 									<Content name="Image"><url>rbxassetid://347774392</url></Content>
-									<Color3 name="ImageColor3">4294967295</Color3>
+									<Color3 name="ImageColor3">4286611584</Color3>
 									<Vector2 name="ImageRectOffset">
 										<X>0</X>
 										<Y>0</Y>
@@ -932,7 +938,7 @@ return UserInterfaceBridge]]></ProtectedString>
 										<Y>0</Y>
 									</Vector2>
 									<float name="ImageTransparency">0</float>
-									<string name="Name">ImageLabel</string>
+									<string name="Name">Icon</string>
 									<Ref name="NextSelectionDown">null</Ref>
 									<Ref name="NextSelectionLeft">null</Ref>
 									<Ref name="NextSelectionRight">null</Ref>
@@ -969,7 +975,7 @@ return UserInterfaceBridge]]></ProtectedString>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="Frame" referent="RBX3EEA26A06C4344D88348814090676DBD">
+						<Item class="Frame" referent="RBX934548BDEFF34662A42993C457D7A72C">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1003,7 +1009,7 @@ return UserInterfaceBridge]]></ProtectedString>
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="TextButton" referent="RBXD723606F4AA743FAB7957EDD29354AE7">
+							<Item class="TextButton" referent="RBX276566FE834B4E14A3F11E9DF80D2E44">
 								<Properties>
 									<bool name="Active">true</bool>
 									<bool name="AutoButtonColor">true</bool>
@@ -1052,7 +1058,7 @@ return UserInterfaceBridge]]></ProtectedString>
 									<int name="ZIndex">1</int>
 								</Properties>
 							</Item>
-							<Item class="Frame" referent="RBX5E623BBFA092450ABB3E1A94B7DCF096">
+							<Item class="Frame" referent="RBX65679FF056014C3489A4F57BA101DADF">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4291348680</Color3>
@@ -1086,7 +1092,7 @@ return UserInterfaceBridge]]></ProtectedString>
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextLabel" referent="RBX99541BB094784746BC93E6B76FAD5098">
+								<Item class="TextLabel" referent="RBX727025ED40024BEFB05DE249F902D402">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4291348680</Color3>
@@ -1131,7 +1137,7 @@ return UserInterfaceBridge]]></ProtectedString>
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextBox" referent="RBXDCB9A1C151254AF0896E183440A8871D">
+								<Item class="TextBox" referent="RBX60905BDFAD294DA1B61FB330DB641F24">
 									<Properties>
 										<bool name="Active">true</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1179,7 +1185,7 @@ return UserInterfaceBridge]]></ProtectedString>
 									</Properties>
 								</Item>
 							</Item>
-							<Item class="TextLabel" referent="RBX803CA19EBDC848E9865E51DA71598211">
+							<Item class="TextLabel" referent="RBXDE767C2BBAB3479AAE3FED5BB9CC466A">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -1212,10 +1218,10 @@ return UserInterfaceBridge]]></ProtectedString>
 									</UDim2>
 									<token name="SizeConstraint">0</token>
 									<string name="Text"></string>
-									<Color3 name="TextColor3">4280229663</Color3>
+									<Color3 name="TextColor3">4292094506</Color3>
 									<bool name="TextScaled">false</bool>
 									<Color3 name="TextStrokeColor3">4292094506</Color3>
-									<float name="TextStrokeTransparency">0.875</float>
+									<float name="TextStrokeTransparency">1</float>
 									<float name="TextTransparency">0</float>
 									<bool name="TextWrapped">false</bool>
 									<token name="TextXAlignment">2</token>
@@ -1225,7 +1231,7 @@ return UserInterfaceBridge]]></ProtectedString>
 								</Properties>
 							</Item>
 						</Item>
-						<Item class="Frame" referent="RBXD44B823A4F9B4503B62869209DFB9401">
+						<Item class="Frame" referent="RBX200DE629AFF34E1996E305C69D388102">
 							<Properties>
 								<bool name="Active">false</bool>
 								<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1259,7 +1265,7 @@ return UserInterfaceBridge]]></ProtectedString>
 								<bool name="Visible">true</bool>
 								<int name="ZIndex">1</int>
 							</Properties>
-							<Item class="Frame" referent="RBXF9E0F356274D4C4797EF1A28ECEAE577">
+							<Item class="Frame" referent="RBXE70AFEEBDD9D4551A5F3C4CA33D27EC2">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1293,7 +1299,7 @@ return UserInterfaceBridge]]></ProtectedString>
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextLabel" referent="RBX9521CAA2C293400594FB36E182DE364C">
+								<Item class="TextLabel" referent="RBXE2A7DC7ED3B94D26B9E6F281EEB632CD">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1338,7 +1344,7 @@ return UserInterfaceBridge]]></ProtectedString>
 										<int name="ZIndex">2</int>
 									</Properties>
 								</Item>
-								<Item class="ScrollingFrame" referent="RBX7A346D54EFEA4731AB2B656C27F77008">
+								<Item class="ScrollingFrame" referent="RBX21D55FA0A38F46EFB3F79010ADF4639B">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4291348680</Color3>
@@ -1386,7 +1392,7 @@ return UserInterfaceBridge]]></ProtectedString>
 										<bool name="Visible">true</bool>
 										<int name="ZIndex">1</int>
 									</Properties>
-									<Item class="TextLabel" referent="RBX649C9DE8C8514E0480C72BC92BE40907">
+									<Item class="TextLabel" referent="RBX7E16B194A2934EA9921A379911015217">
 										<Properties>
 											<bool name="Active">false</bool>
 											<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1433,7 +1439,7 @@ game.ServerScriptService]]></string>
 											<int name="ZIndex">1</int>
 										</Properties>
 									</Item>
-									<Item class="TextLabel" referent="RBX2A8F07959D1C41FD9C398E5D78FE5264">
+									<Item class="TextLabel" referent="RBX3133C31BB42F4C67B5F0EF89A4768DDE">
 										<Properties>
 											<bool name="Active">false</bool>
 											<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1482,7 +1488,7 @@ game.ServerScriptService]]></string>
 									</Item>
 								</Item>
 							</Item>
-							<Item class="Frame" referent="RBX370C1B5B21974DC4A5EF78D95139815B">
+							<Item class="Frame" referent="RBXAF637B9450314972A96BB025A4D9B910">
 								<Properties>
 									<bool name="Active">false</bool>
 									<Color3 name="BackgroundColor3">4294967295</Color3>
@@ -1516,7 +1522,7 @@ game.ServerScriptService]]></string>
 									<bool name="Visible">true</bool>
 									<int name="ZIndex">1</int>
 								</Properties>
-								<Item class="TextLabel" referent="RBX3192939BA6274AB9948643607DF3870E">
+								<Item class="TextLabel" referent="RBX8F1196B40E9D41F0835A90DE0CC7624A">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1561,7 +1567,7 @@ game.ServerScriptService]]></string>
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBX41E52195829B43E9B542D0910E5F201A">
+								<Item class="TextLabel" referent="RBXA18B0A5EFB7C4880BD0939549DBCF0CB">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1606,7 +1612,7 @@ game.ServerScriptService]]></string>
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBX0964E91EB1954A7ABE55838E6D06682B">
+								<Item class="TextLabel" referent="RBX5F62F82330F5447F81F7868D49934205">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1651,7 +1657,7 @@ game.ServerScriptService]]></string>
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBX82CD43539B764262ACB97DFE67E000ED">
+								<Item class="TextLabel" referent="RBXBA7006D330454789B18063120DDB5118">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1696,7 +1702,7 @@ game.ServerScriptService]]></string>
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBX18B119AE8E8B42ACBE25E43931C2A92E">
+								<Item class="TextLabel" referent="RBXCF4FEC903A8E4E7EA76A213D88C4C568">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
@@ -1741,7 +1747,7 @@ game.ServerScriptService]]></string>
 										<int name="ZIndex">1</int>
 									</Properties>
 								</Item>
-								<Item class="TextLabel" referent="RBX5CF0A3AC85C94E72B64E18B72764684B">
+								<Item class="TextLabel" referent="RBXF3A7C390F4C84BF8B64332B85704CE26">
 									<Properties>
 										<bool name="Active">false</bool>
 										<Color3 name="BackgroundColor3">4293980400</Color3>
