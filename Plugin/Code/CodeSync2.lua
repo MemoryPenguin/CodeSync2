@@ -1,9 +1,9 @@
 -- squelch warnings
 plugin = plugin
 
-local NetworkBridge = require(plugin.Modules.NetworkBridge)
-local UserInterfaceBridge = require(plugin.Modules.UserInterfaceBridge)
-local SyncHandler = require(plugin.Modules.SyncHandler)
+local NetworkBridge = require(script.Parent.Modules.NetworkBridge)
+local UserInterfaceBridge = require(script.Parent.Modules.UserInterfaceBridge)
+local SyncHandler = require(script.Parent.Modules.SyncHandler)
 
 local function FormatTable(t, indentLevel)
 	indentLevel = indentLevel or 0
