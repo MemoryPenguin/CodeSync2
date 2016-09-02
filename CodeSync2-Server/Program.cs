@@ -17,7 +17,6 @@ namespace MemoryPenguin.CodeSync2.Server
             if (args.Length != 1)
             {
                 Console.WriteLine("Usage: codesync <config_file>");
-                Console.ReadLine();
                 return 1;
             }
 
