@@ -1,6 +1,9 @@
-local NetworkBridge = require(script.NetworkBridge)
-local UserInterfaceBridge = require(script.UserInterfaceBridge)
-local SyncHandler = require(script.SyncHandler)
+-- squelch warnings
+plugin = plugin
+
+local NetworkBridge = require(plugin.Modules.NetworkBridge)
+local UserInterfaceBridge = require(plugin.Modules.UserInterfaceBridge)
+local SyncHandler = require(plugin.Modules.SyncHandler)
 
 local function FormatTable(t, indentLevel)
 	indentLevel = indentLevel or 0
@@ -19,9 +22,6 @@ local function FormatTable(t, indentLevel)
 	
 	return result..("\t"):format():rep(indentLevel).."}"
 end
-
--- squelch warnings
-plugin = plugin
 
 local toolbar = plugin:CreateToolbar("CodeSync 2")
 local button = toolbar:CreateButton("CodeSync 2", "Opens the CodeSync 2 user interface, allowing you to synchronize files across your computer and Studio.", "rbxassetid://347676411")
